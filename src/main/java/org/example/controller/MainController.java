@@ -52,6 +52,12 @@ public class MainController {
             refreshDashboard();
         } catch (SQLException e) {
             System.err.println("Failed to initialize system: " + e.getMessage());
+            // We use Platform.runLater if necessary, but initialize is usually fine for
+            // alerts
+            javafx.application.Platform.runLater(() -> showAlert("Initialization Error",
+                    "The system could not connect to the database. Please ensure MySQL is running.\nDetails: "
+                            + e.getMessage(),
+                    Alert.AlertType.ERROR));
         }
     }
 
@@ -2414,6 +2420,7 @@ public class MainController {
     }
 
     // Additional utility methods (not in FXML but useful)
+    @FXML
     public void showAbout() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("About Hospital Management System");
@@ -2435,6 +2442,7 @@ public class MainController {
         alert.showAndWait();
     }
 
+    @FXML
     public void exitApplication() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Exit Application");
