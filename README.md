@@ -2,6 +2,41 @@
 
 A robust, optimized JavaFX application for managing hospital operations with a focus on database performance and data structure application.
 
+### 📂 Directory Structure
+
+```
+src/main/java/org/example
+├── controller
+│   └── MainController.java
+├── dao
+│   ├── AppointmentDAO.java
+│   ├── DepartmentDAO.java
+│   ├── DoctorDAO.java
+│   ├── MedicalInventoryDAO.java
+│   ├── PatientDAO.java
+│   ├── PatientFeedbackDAO.java
+│   └── PrescriptionDAO.java
+├── model
+│   ├── Appointment.java
+│   ├── Department.java
+│   ├── Doctor.java
+│   ├── MedicalInventory.java
+│   ├── Patient.java
+│   ├── PatientFeedback.java
+│   ├── Prescription.java
+│   └── PrescriptionItem.java
+├── service
+│   ├── AppointmentService.java
+│   ├── DoctorService.java
+│   ├── HospitalService.java
+│   ├── PatientService.java
+│   └── PrescriptionService.java
+└── util
+    ├── DatabaseConnection.java
+    ├── DatabaseUpdater.java
+    └── ValidationUtils.java
+```
+
 ## 🚀 Features
 
 - **Dynamic Patient & Doctor Management**: Full CRUD operations with JavaFX UI.
@@ -51,6 +86,8 @@ The project follows a clean **Controller-Service-DAO** pattern:
 - **DAO (Data Access Layer)**: Parameterized JDBC queries for secure and structured DB access.
 - **Service (Business Layer)**: Handles caching, validation, and algorithmic logic.
 - **Controller (UI Layer)**: Manages JavaFX interaction and view synchronization.
+
+
 
 ---
 *Developed as part of the Database Fundamentals project objectives.*
