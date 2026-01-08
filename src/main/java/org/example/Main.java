@@ -9,9 +9,11 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/MainView.fxml"));
-        Scene scene = new Scene(loader.load());
-        primaryStage.setTitle("Hospital Management System");
+        Scene scene = new Scene(loader.load(), 1024, 720);
+        primaryStage.setTitle("Hospital Management System - v2.0");
         primaryStage.setScene(scene);
+        primaryStage.setResizable(true);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 
