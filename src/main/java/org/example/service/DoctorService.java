@@ -2,6 +2,8 @@ package org.example.service;
 
 import org.example.dao.DoctorDAO;
 import org.example.model.Doctor;
+import org.example.model.Patient;
+
 import java.sql.SQLException;
 import java.util.*;
 
@@ -32,6 +34,16 @@ public class DoctorService {
             doctorCache.put(d.getId(), d);
         }
         return doctors;
+    }
+
+    public void updateDoctor(Doctor doctor) throws SQLException {
+        doctorDAO.updateDoctor(doctor);
+        invalidateCache();
+    }
+
+    public void deleteDoctor(int id) throws SQLException {
+        doctorDAO.deleteDoctor(id);
+        invalidateCache();
     }
 
     private void invalidateCache() {

@@ -12,7 +12,7 @@ public class MedicalInventoryDAO {
         String sql = "INSERT INTO medical_inventory (item_name, quantity, unit) VALUES (?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, item.getItemName());
             stmt.setInt(2, item.getQuantity());
@@ -35,16 +35,15 @@ public class MedicalInventoryDAO {
         String sql = "SELECT * FROM medical_inventory ORDER BY item_name";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 inventory.add(new MedicalInventory(
                         rs.getInt("id"),
                         rs.getString("item_name"),
                         rs.getInt("quantity"),
-                        rs.getString("unit")
-                ));
+                        rs.getString("unit")));
             }
         }
         return inventory;
@@ -54,10 +53,24 @@ public class MedicalInventoryDAO {
         String sql = "UPDATE medical_inventory SET quantity = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, newQuantity);
             stmt.setInt(2, itemId);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void updateInventoryItem(MedicalInventory item) throws SQLException {
+        String sql = "UPDATE medical_inventory SET item_name = ?, quantity = ?, unit = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, item.getItemName());
+            stmt.setInt(2, item.getQuantity());
+            stmt.setString(3, item.getUnit());
+            stmt.setInt(4, item.getId());
             stmt.executeUpdate();
         }
     }
@@ -66,7 +79,7 @@ public class MedicalInventoryDAO {
         String sql = "DELETE FROM medical_inventory WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             stmt.executeUpdate();
@@ -78,7 +91,7 @@ public class MedicalInventoryDAO {
         String sql = "SELECT * FROM medical_inventory WHERE item_name LIKE ? ORDER BY item_name";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, "%" + searchTerm + "%");
             ResultSet rs = stmt.executeQuery();
@@ -88,8 +101,7 @@ public class MedicalInventoryDAO {
                         rs.getInt("id"),
                         rs.getString("item_name"),
                         rs.getInt("quantity"),
-                        rs.getString("unit")
-                ));
+                        rs.getString("unit")));
             }
         }
         return inventory;
@@ -100,7 +112,7 @@ public class MedicalInventoryDAO {
         String sql = "SELECT * FROM medical_inventory WHERE quantity <= ? ORDER BY quantity";
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, threshold);
             ResultSet rs = stmt.executeQuery();
@@ -110,8 +122,7 @@ public class MedicalInventoryDAO {
                         rs.getInt("id"),
                         rs.getString("item_name"),
                         rs.getInt("quantity"),
-                        rs.getString("unit")
-                ));
+                        rs.getString("unit")));
             }
         }
         return lowStock;

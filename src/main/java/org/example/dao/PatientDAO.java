@@ -16,7 +16,7 @@ public class PatientDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, patient.getFirstName());
             stmt.setString(2, patient.getLastName());
@@ -45,7 +45,7 @@ public class PatientDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
@@ -58,8 +58,7 @@ public class PatientDAO {
                         rs.getDate("date_of_birth").toLocalDate(),
                         rs.getString("address"),
                         rs.getString("phone"),
-                        rs.getString("email")
-                );
+                        rs.getString("email"));
             }
 
         } finally {
@@ -74,8 +73,8 @@ public class PatientDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 patients.add(new Patient(
@@ -85,8 +84,7 @@ public class PatientDAO {
                         rs.getDate("date_of_birth").toLocalDate(),
                         rs.getString("address"),
                         rs.getString("phone"),
-                        rs.getString("email")
-                ));
+                        rs.getString("email")));
             }
 
         } finally {
@@ -100,7 +98,7 @@ public class PatientDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, patient.getFirstName());
             stmt.setString(2, patient.getLastName());
@@ -117,15 +115,41 @@ public class PatientDAO {
     }
 
     public void deletePatient(int id) throws SQLException {
-        String sql = "DELETE FROM patients WHERE id = ?";
         long startTime = System.currentTimeMillis();
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Manual deletion of child records to ensure success even if CASCADE fails
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "DELETE FROM prescription_items WHERE prescription_id IN (SELECT id FROM prescriptions WHERE patient_id = ?)")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM prescriptions WHERE patient_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM appointments WHERE patient_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn
+                        .prepareStatement("DELETE FROM patient_feedback WHERE patient_id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                try (PreparedStatement stmt = conn.prepareStatement("DELETE FROM patients WHERE id = ?")) {
+                    stmt.setInt(1, id);
+                    stmt.executeUpdate();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
         } finally {
             updatePerformanceStats(startTime);
         }
@@ -137,7 +161,7 @@ public class PatientDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             String likeTerm = "%" + name + "%";
             stmt.setString(1, likeTerm);
@@ -153,8 +177,7 @@ public class PatientDAO {
                         rs.getDate("date_of_birth").toLocalDate(),
                         rs.getString("address"),
                         rs.getString("phone"),
-                        rs.getString("email")
-                ));
+                        rs.getString("email")));
             }
 
         } finally {
@@ -168,8 +191,8 @@ public class PatientDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             if (rs.next()) {
                 return rs.getInt("count");

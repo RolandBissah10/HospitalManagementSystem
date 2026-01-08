@@ -3,213 +3,128 @@ package org.example.service;
 import org.example.dao.*;
 import org.example.model.*;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class HospitalService {
-    private PatientDAO patientDAO = new PatientDAO();
-    private AppointmentDAO appointmentDAO = new AppointmentDAO();
-    private DoctorDAO doctorDAO = new DoctorDAO();
-    private MedicalInventoryDAO inventoryDAO = new MedicalInventoryDAO();
+    private final PatientDAO patientDAO = new PatientDAO();
+    private final AppointmentDAO appointmentDAO = new AppointmentDAO();
+    private final DoctorDAO doctorDAO = new DoctorDAO();
+    private final MedicalInventoryDAO inventoryDAO = new MedicalInventoryDAO();
+    private final PatientFeedbackDAO feedbackDAO = new PatientFeedbackDAO();
+    private final DepartmentDAO departmentDAO = new DepartmentDAO();
 
-    // Advanced caching with sorting indexes
-    private Map<Integer, Patient> patientCache = new ConcurrentHashMap<>();
-    private Map<String, TreeMap<String, List<Integer>>> patientSortIndexes = new ConcurrentHashMap<>();
+    private final Map<Integer, Patient> patientCache = new ConcurrentHashMap<>();
 
-    public PerformanceReport generatePerformanceReport() throws SQLException {
-        PerformanceReport report = new PerformanceReport();
-
-        // Database query performance
-        long startTime = System.currentTimeMillis();
-        List<Patient> patients = patientDAO.getAllPatients();
-        long endTime = System.currentTimeMillis();
-        report.setPatientQueryTime(endTime - startTime);
-
-        startTime = System.currentTimeMillis();
-        List<Appointment> appointments = appointmentDAO.getAllAppointments();
-        endTime = System.currentTimeMillis();
-        report.setAppointmentQueryTime(endTime - startTime);
-
-        startTime = System.currentTimeMillis();
-        int scheduledCount = appointmentDAO.getAppointmentCountByStatus("scheduled");
-        endTime = System.currentTimeMillis();
-        report.setComplexQueryTime(endTime - startTime);
-
-        // Cache performance
-        report.setCacheStats(getCacheStatistics());
-
-        return report;
-    }
-
-    public List<Patient> searchAndSortPatients(String searchTerm, String sortField, boolean ascending) throws SQLException {
-        List<Patient> patients = patientDAO.searchPatients(searchTerm);
-
-        // Sort using appropriate algorithm based on data size
-        if (patients.size() > 1000) {
-            // Use merge sort for large datasets
-            patients = mergeSortPatients(patients, sortField, ascending);
-        } else if (patients.size() > 100) {
-            // Use quick sort for medium datasets
-            patients = quickSortPatients(patients, sortField, ascending);
-        } else {
-            // Use bubble sort for small datasets (for demonstration)
-            patients = bubbleSortPatients(patients, sortField, ascending);
+    public List<Patient> getAllPatients() throws SQLException {
+        if (patientCache.isEmpty()) {
+            patientDAO.getAllPatients().forEach(p -> patientCache.put(p.getId(), p));
         }
-
-        return patients;
+        return new ArrayList<>(patientCache.values());
     }
 
-    private List<Patient> quickSortPatients(List<Patient> patients, String sortField, boolean ascending) {
-        List<Patient> sorted = new ArrayList<>(patients);
-        quickSort(sorted, 0, sorted.size() - 1, sortField, ascending);
-        return sorted;
+    public void addPatient(Patient p) throws SQLException {
+        patientDAO.addPatient(p);
+        patientCache.put(p.getId(), p);
     }
 
-    private void quickSort(List<Patient> patients, int low, int high, String sortField, boolean ascending) {
+    public List<Patient> searchAndSortPatients(String term, String field, boolean asc) throws SQLException {
+        List<Patient> list = patientDAO.searchPatients(term);
+        if (list.size() < 2)
+            return list;
+        quickSort(list, 0, list.size() - 1, field, asc);
+        return list;
+    }
+
+    private void quickSort(List<Patient> list, int low, int high, String field, boolean asc) {
         if (low < high) {
-            int pi = partition(patients, low, high, sortField, ascending);
-            quickSort(patients, low, pi - 1, sortField, ascending);
-            quickSort(patients, pi + 1, high, sortField, ascending);
+            int pi = partition(list, low, high, field, asc);
+            quickSort(list, low, pi - 1, field, asc);
+            quickSort(list, pi + 1, high, field, asc);
         }
     }
 
-    private int partition(List<Patient> patients, int low, int high, String sortField, boolean ascending) {
-        Patient pivot = patients.get(high);
-        int i = low - 1;
-
+    private int partition(List<Patient> list, int low, int high, String field, boolean asc) {
+        Patient pivot = list.get(high);
+        int i = (low - 1);
         for (int j = low; j < high; j++) {
-            int comparison = comparePatients(patients.get(j), pivot, sortField);
-            if (ascending ? comparison < 0 : comparison > 0) {
+            if (compare(list.get(j), pivot, field, asc) <= 0) {
                 i++;
-                Collections.swap(patients, i, j);
+                Collections.swap(list, i, j);
             }
         }
-        Collections.swap(patients, i + 1, high);
+        Collections.swap(list, i + 1, high);
         return i + 1;
     }
 
-    private List<Patient> mergeSortPatients(List<Patient> patients, String sortField, boolean ascending) {
-        if (patients.size() <= 1) {
-            return patients;
-        }
-
-        int mid = patients.size() / 2;
-        List<Patient> left = mergeSortPatients(new ArrayList<>(patients.subList(0, mid)), sortField, ascending);
-        List<Patient> right = mergeSortPatients(new ArrayList<>(patients.subList(mid, patients.size())), sortField, ascending);
-
-        return mergePatients(left, right, sortField, ascending);
-    }
-
-    private List<Patient> mergePatients(List<Patient> left, List<Patient> right, String sortField, boolean ascending) {
-        List<Patient> merged = new ArrayList<>();
-        int i = 0, j = 0;
-
-        while (i < left.size() && j < right.size()) {
-            int comparison = comparePatients(left.get(i), right.get(j), sortField);
-            if (ascending ? comparison <= 0 : comparison > 0) {
-                merged.add(left.get(i++));
-            } else {
-                merged.add(right.get(j++));
-            }
-        }
-
-        while (i < left.size()) {
-            merged.add(left.get(i++));
-        }
-
-        while (j < right.size()) {
-            merged.add(right.get(j++));
-        }
-
-        return merged;
-    }
-
-    private List<Patient> bubbleSortPatients(List<Patient> patients, String sortField, boolean ascending) {
-        List<Patient> sorted = new ArrayList<>(patients);
-        int n = sorted.size();
-
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = 0; j < n - i - 1; j++) {
-                int comparison = comparePatients(sorted.get(j), sorted.get(j + 1), sortField);
-                if (ascending ? comparison > 0 : comparison < 0) {
-                    Collections.swap(sorted, j, j + 1);
-                }
-            }
-        }
-
-        return sorted;
-    }
-
-    private int comparePatients(Patient p1, Patient p2, String sortField) {
-        switch (sortField.toLowerCase()) {
+    private int compare(Patient p1, Patient p2, String field, boolean asc) {
+        int res = 0;
+        switch (field.toLowerCase()) {
             case "name":
-                int lastNameCompare = p1.getLastName().compareToIgnoreCase(p2.getLastName());
-                if (lastNameCompare != 0) return lastNameCompare;
-                return p1.getFirstName().compareToIgnoreCase(p2.getFirstName());
-            case "dateofbirth":
-                return p1.getDateOfBirth().compareTo(p2.getDateOfBirth());
+                res = (p1.getFirstName() + p1.getLastName()).compareToIgnoreCase(p2.getFirstName() + p2.getLastName());
+                break;
             case "id":
-                return Integer.compare(p1.getId(), p2.getId());
+                res = Integer.compare(p1.getId(), p2.getId());
+                break;
             default:
-                return Integer.compare(p1.getId(), p2.getId());
+                res = Integer.compare(p1.getId(), p2.getId());
         }
+        return asc ? res : -res;
     }
 
     public Map<String, Object> getSystemStatistics() throws SQLException {
         Map<String, Object> stats = new HashMap<>();
-
         stats.put("totalPatients", patientDAO.getTotalPatientCount());
         stats.put("totalDoctors", doctorDAO.getAllDoctors().size());
         stats.put("totalAppointments", appointmentDAO.getAllAppointments().size());
-        stats.put("scheduledAppointments", appointmentDAO.getAppointmentCountByStatus("scheduled"));
-        stats.put("completedAppointments", appointmentDAO.getAppointmentCountByStatus("completed"));
-
-        List<MedicalInventory> lowStock = inventoryDAO.getLowStockItems(10);
-        stats.put("lowStockItems", lowStock.size());
-        stats.put("avgPatientQueryTime", patientDAO.getAverageQueryTime());
-        stats.put("avgAppointmentQueryTime", appointmentDAO.getAverageQueryTime());
-
+        stats.put("totalInventory", inventoryDAO.getAllInventory().size());
+        stats.put("lowStockItems", inventoryDAO.getLowStockItems(10).size());
         return stats;
     }
 
-    private Map<String, Object> getCacheStatistics() {
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("patientCacheSize", patientCache.size());
-        return stats;
+    public Map<String, Long> getPerformanceMetrics() throws SQLException {
+        Map<String, Long> metrics = new HashMap<>();
+        long start = System.currentTimeMillis();
+        patientDAO.getAllPatients();
+        metrics.put("db_query_ms", System.currentTimeMillis() - start);
+        start = System.currentTimeMillis();
+        getAllPatients();
+        metrics.put("cache_lookup_ms", System.currentTimeMillis() - start);
+        return metrics;
     }
 
-    public static class PerformanceReport {
-        private long patientQueryTime;
-        private long appointmentQueryTime;
-        private long complexQueryTime;
-        private Map<String, Object> cacheStats;
+    public void addFeedback(PatientFeedback f) throws SQLException {
+        f.setFeedbackDate(LocalDateTime.now());
+        feedbackDAO.addFeedback(f);
+    }
 
-        // Getters and setters
-        public long getPatientQueryTime() { return patientQueryTime; }
-        public void setPatientQueryTime(long time) { this.patientQueryTime = time; }
+    public List<PatientFeedback> getAllFeedback() throws SQLException {
+        return feedbackDAO.getAllFeedback();
+    }
 
-        public long getAppointmentQueryTime() { return appointmentQueryTime; }
-        public void setAppointmentQueryTime(long time) { this.appointmentQueryTime = time; }
+    public List<MedicalInventory> getLowStockItems() throws SQLException {
+        return inventoryDAO.getLowStockItems(10);
+    }
 
-        public long getComplexQueryTime() { return complexQueryTime; }
-        public void setComplexQueryTime(long time) { this.complexQueryTime = time; }
+    // Department Methods
+    public List<Department> getAllDepartments() throws SQLException {
+        return departmentDAO.getAllDepartments();
+    }
 
-        public Map<String, Object> getCacheStats() { return cacheStats; }
-        public void setCacheStats(Map<String, Object> stats) { this.cacheStats = stats; }
+    public void addDepartment(Department d) throws SQLException {
+        departmentDAO.addDepartment(d);
+    }
 
-        @Override
-        public String toString() {
-            return String.format(
-                    "Performance Report:\n" +
-                            "Patient Query Time: %d ms\n" +
-                            "Appointment Query Time: %d ms\n" +
-                            "Complex Query Time: %d ms\n" +
-                            "Cache Size: %d",
-                    patientQueryTime, appointmentQueryTime, complexQueryTime,
-                    cacheStats != null ? (int)cacheStats.get("patientCacheSize") : 0
-            );
-        }
+    public void updateDepartment(Department d) throws SQLException {
+        departmentDAO.updateDepartment(d);
+    }
+
+    public void deleteDepartment(int id) throws SQLException {
+        departmentDAO.deleteDepartment(id);
+    }
+
+    public Department getDepartment(int id) throws SQLException {
+        return departmentDAO.getDepartment(id);
     }
 }

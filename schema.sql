@@ -39,8 +39,8 @@ CREATE TABLE appointments (
     appointment_date DATE NOT NULL,
     appointment_time TIME NOT NULL,
     status VARCHAR(20) DEFAULT 'scheduled',
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id)
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
 );
 
 -- Prescriptions
@@ -49,8 +49,8 @@ CREATE TABLE prescriptions (
     patient_id INT NOT NULL,
     doctor_id INT NOT NULL,
     prescription_date DATE NOT NULL,
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id)
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
 );
 
 -- Prescription Items
@@ -59,17 +59,19 @@ CREATE TABLE prescription_items (
     prescription_id INT NOT NULL,
     medication VARCHAR(100) NOT NULL,
     dosage VARCHAR(50),
-    FOREIGN KEY (prescription_id) REFERENCES prescriptions(id)
+    FOREIGN KEY (prescription_id) REFERENCES prescriptions(id) ON DELETE CASCADE
 );
 
 -- Patient Feedback
 CREATE TABLE patient_feedback (
     id INT PRIMARY KEY AUTO_INCREMENT,
     patient_id INT NOT NULL,
+    appointment_id INT,
     rating INT CHECK (rating >= 1 AND rating <= 5),
     comments TEXT,
-    feedback_date DATE NOT NULL,
-    FOREIGN KEY (patient_id) REFERENCES patients(id)
+    feedback_date DATETIME NOT NULL,
+    FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE,
+    FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE SET NULL
 );
 
 -- Medical Inventory
@@ -88,6 +90,19 @@ ALTER TABLE prescriptions
 -- Update existing prescriptions to have empty values for new columns
 UPDATE prescriptions SET diagnosis = '', notes = '' WHERE diagnosis IS NULL;
 
+-- Add with CASCADE
+ALTER TABLE appointments
+    ADD CONSTRAINT fk_appointments_patient
+        FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE;
+
+ALTER TABLE prescriptions
+    ADD CONSTRAINT fk_prescriptions_patient
+        FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE;
+
+ALTER TABLE patient_feedback
+    ADD CONSTRAINT fk_patient_feedback_patient
+        FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE;
+
 
 -- Indexes
 CREATE INDEX idx_patients_name ON patients (first_name, last_name);
@@ -95,6 +110,9 @@ CREATE INDEX idx_doctors_department ON doctors (department_id);
 CREATE INDEX idx_appointments_date ON appointments (appointment_date);
 CREATE INDEX idx_appointments_patient ON appointments (patient_id);
 CREATE INDEX idx_appointments_doctor ON appointments (doctor_id);
+CREATE INDEX idx_prescriptions_patient ON prescriptions (patient_id);
+CREATE INDEX idx_prescriptions_doctor ON prescriptions (doctor_id);
+CREATE INDEX idx_inventory_name ON medical_inventory (item_name);
 
 -- Sample Data
 INSERT INTO departments (name) VALUES ('Cardiology'), ('Neurology'), ('Orthopedics');

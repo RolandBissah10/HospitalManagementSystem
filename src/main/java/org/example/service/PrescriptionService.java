@@ -19,6 +19,11 @@ public class PrescriptionService {
         invalidateCache();
     }
 
+    public void updatePrescription(Prescription prescription, List<PrescriptionItem> items) throws SQLException {
+        prescriptionDAO.updatePrescriptionWithItems(prescription, items);
+        invalidateCache();
+    }
+
     public Prescription getPrescription(int id) throws SQLException {
         if (prescriptionCache.containsKey(id)) {
             return prescriptionCache.get(id);
