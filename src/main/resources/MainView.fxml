@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controller.MainController"
+      spacing="0"
+      stylesheets="@styles.css"
+      styleClass="main-container">
+
+   <!-- Bind VBox to fill parent -->
+   <VBox.margin>
+      <Insets top="0" right="0" bottom="0" left="0" />
+   </VBox.margin>
+
+   <!-- Top Header with Emerald Gradient -->
+   <VBox style="-fx-background-color: linear-gradient(to right, #0f172a, #059669); -fx-padding: 15 25;">
+      <HBox alignment="CENTER_LEFT" spacing="12">
+         <Label text="🏥" styleClass="logo-icon" style="-fx-font-size: 36px; -fx-text-fill: white;" />
+         <VBox spacing="2">
+            <Label text="Hospital Management System"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;" />
+            <Label text="Advanced Healthcare Database Management"
+                   style="-fx-font-size: 13px; -fx-text-fill: #b3e0ff; -fx-opacity: 0.9;" />
+         </VBox>
+      </HBox>
+
+      <!-- User Info Bar -->
+      <HBox spacing="10" style="-fx-padding: 8 0 0 0;" alignment="CENTER_LEFT">
+         <HBox spacing="5" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 4 10; -fx-background-radius: 15;">
+            <Label text="👤" style="-fx-text-fill: white; -fx-font-size: 11px;" />
+            <Label text="Admin User" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+         </HBox>
+         <HBox spacing="5" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 4 10; -fx-background-radius: 15;">
+            <Label text="🏢" style="-fx-text-fill: white; -fx-font-size: 11px;" />
+            <Label text="General Hospital" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+         </HBox>
+         <HBox spacing="5" style="-fx-background-color: rgba(255,255,255,0.1); -fx-padding: 4 10; -fx-background-radius: 15;">
+            <Label text="📅" style="-fx-text-fill: white; -fx-font-size: 11px;" />
+            <Label text="Database: v2.0" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 11px;" />
+         </HBox>
+      </HBox>
+   </VBox>
+
+   <!-- Main Content Area -->
+   <HBox spacing="0" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+
+      <!-- Left Navigation Menu / Sidebar - Expanded and Scrollable -->
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                styleClass="sidebar-scroll" HBox.hgrow="NEVER"
+                style="-fx-background-color: #111827; -fx-min-width: 200; -fx-pref-width: 200; -fx-padding: 0; -fx-background: #111827;">
+         <VBox style="-fx-background-color: #111827; -fx-padding: 15;">
+            <Label text="NAVIGATION"
+                   style="-fx-font-size: 10px; -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
+
+         <VBox spacing="6">
+            <!-- Patient Management -->
+            <VBox style="-fx-background-color: #1a243b; -fx-background-radius: 6; -fx-padding: 10;">
+               <HBox spacing="8" alignment="CENTER_LEFT">
+                  <Label text="👥" styleClass="icon-root" style="-fx-font-size: 18px; -fx-text-fill: #10b981;" />
+                  <Label text="Patient Management" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;" />
+               </HBox>
+               <VBox spacing="3" style="-fx-padding: 8 0 0 15;">
+                  <Button onAction="#addPatient" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="➕" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Add Patient" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#viewPatients" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="👁️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="View All" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#searchPatients" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🔍" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Search" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#updatePatient" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="✏️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Update" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#deletePatient" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🗑️" styleClass="icon-root" style="-fx-text-fill: #94a3b8;" /><Label text="Delete" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+               </VBox>
+            </VBox>
+
+            <!-- Doctor Management -->
+            <VBox style="-fx-background-color: #1a243b; -fx-background-radius: 6; -fx-padding: 10;">
+               <HBox spacing="8" alignment="CENTER_LEFT">
+                  <Label text="🩺" styleClass="icon-root" style="-fx-font-size: 18px; -fx-text-fill: #10b981;" />
+                  <Label text="Doctor Management" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;" />
+               </HBox>
+               <VBox spacing="3" style="-fx-padding: 8 0 0 15;">
+                  <Button onAction="#addDoctor" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="➕" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Add Doctor" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#viewDoctors" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="👁️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="View All" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#searchDoctors" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🔍" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Search" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#updateDoctor" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="✏️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Update" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#deleteDoctor" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🗑️" styleClass="icon-root" style="-fx-text-fill: #94a3b8;" /><Label text="Delete" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+               </VBox>
+            </VBox>
+
+            <!-- Appointments -->
+            <VBox style="-fx-background-color: #1a243b; -fx-background-radius: 6; -fx-padding: 10;">
+               <HBox spacing="8" alignment="CENTER_LEFT">
+                  <Label text="📅" styleClass="icon-root" style="-fx-font-size: 18px; -fx-text-fill: #0ea5e9;" />
+                  <Label text="Appointments" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;" />
+               </HBox>
+               <VBox spacing="3" style="-fx-padding: 8 0 0 15;">
+                  <Button onAction="#scheduleAppointment" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="📅" styleClass="icon-root" style="-fx-text-fill: #0ea5e9;" /><Label text="Schedule" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#viewAppointments" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="👁️" styleClass="icon-root" style="-fx-text-fill: #0ea5e9;" /><Label text="View All" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#updateAppointment" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="✏️" styleClass="icon-root" style="-fx-text-fill: #0ea5e9;" /><Label text="Update" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#deleteAppointment" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🗑️" styleClass="icon-root" style="-fx-text-fill: #94a3b8;" /><Label text="Delete" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#viewAppointmentStats" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="📊" styleClass="icon-root" style="-fx-text-fill: #0ea5e9;" /><Label text="Statistics" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+               </VBox>
+            </VBox>
+
+            <!-- Quick Actions -->
+            <Label text="QUICK ACTIONS"
+                   style="-fx-font-size: 10px; -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+
+            <!-- Prescription Services -->
+            <VBox style="-fx-background-color: #1a243b; -fx-background-radius: 6; -fx-padding: 10;">
+               <HBox spacing="8" alignment="CENTER_LEFT">
+                  <Label text="💊" styleClass="icon-root" style="-fx-font-size: 18px; -fx-text-fill: #10b981;" />
+                  <Label text="Prescriptions" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;" />
+               </HBox>
+               <VBox spacing="3" style="-fx-padding: 8 0 0 15;">
+                  <Button onAction="#addPrescription" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="➕" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Issue" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#viewPrescriptions" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="👁️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="View All" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#updatePrescription" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="✏️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Update" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#deletePrescription" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🗑️" styleClass="icon-root" style="-fx-text-fill: #94a3b8;" /><Label text="Delete" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+               </VBox>
+            </VBox>
+
+            <!-- Inventory Management -->
+            <VBox style="-fx-background-color: #1a243b; -fx-background-radius: 6; -fx-padding: 10;">
+               <HBox spacing="8" alignment="CENTER_LEFT">
+                  <Label text="📦" styleClass="icon-root" style="-fx-font-size: 18px; -fx-text-fill: #10b981;" />
+                  <Label text="Inventory" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;" />
+               </HBox>
+               <VBox spacing="3" style="-fx-padding: 8 0 0 15;">
+                  <Button onAction="#addInventoryItem" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="➕" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Add Item" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#viewInventory" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="👁️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Stock" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#updateInventoryItem" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="✏️" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Update" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#deleteInventoryItem" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🗑️" styleClass="icon-root" style="-fx-text-fill: #94a3b8;" /><Label text="Delete" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+               </VBox>
+            </VBox>
+
+
+            <!-- Hospital Management -->
+            <Label text="HOSPITAL"
+                   style="-fx-font-size: 10px; -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-padding: 15 0 5 0;" />
+            <VBox style="-fx-background-color: #1a243b; -fx-background-radius: 6; -fx-padding: 10;">
+               <HBox spacing="8" alignment="CENTER_LEFT">
+                  <Label text="🏢" styleClass="icon-root" style="-fx-font-size: 18px; -fx-text-fill: #10b981;" />
+                  <Label text="Management" style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13px;" />
+               </HBox>
+               <VBox spacing="3" style="-fx-padding: 8 0 0 15;">
+                  <Button onAction="#viewDepartments" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🏢" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Departments" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+                  <Button onAction="#viewPatientFeedback" styleClass="nav-button">
+                     <graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="💬" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Feedback" style="-fx-text-fill: white;" /></HBox></graphic>
+                  </Button>
+               </VBox>
+            </VBox>
+         </VBox>
+      </VBox>
+   </ScrollPane>
+
+      <!-- Right Content Area - Make it scrollable for small screens -->
+      <ScrollPane fitToWidth="true" fitToHeight="true" HBox.hgrow="ALWAYS" style="-fx-background-color: transparent; -fx-padding: 0;">
+         <VBox spacing="15" style="-fx-padding: 15; -fx-background-color: white;" VBox.vgrow="ALWAYS" alignment="TOP_CENTER">
+
+            <!-- Welcome Section -->
+            <VBox spacing="8" alignment="TOP_LEFT">
+               <Label text="Welcome, Administrator"
+                      style="-fx-font-size: 26px; -fx-font-weight: 800; -fx-text-fill: #0f172a;" />
+               <Label text="Manage hospital operations with specialized accuracy and professional efficiency."
+                      style="-fx-font-size: 15px; -fx-text-fill: #64748b;" />
+            </VBox>
+
+            <!-- Dashboard Cards - Fluid Adaptive FlowPane -->
+            <FlowPane hgap="15" vgap="15" prefWrapLength="600" alignment="TOP_CENTER" style="-fx-padding: 5 0;">
+               <!-- Patients Card -->
+               <VBox styleClass="dashboard-card" minWidth="220" prefWidth="240">
+                  <HBox spacing="12" alignment="CENTER_LEFT">
+                     <Label text="👥" styleClass="icon-root" style="-fx-font-size: 32px; -fx-text-fill: #059669;" />
+                     <VBox spacing="2">
+                        <Label text="Patients" styleClass="stat-label" />
+                        <Label text="Total Registered" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" />
+                     </VBox>
+                  </HBox>
+                  <Label fx:id="patientCountLabel" text="0" styleClass="stat-value" style="-fx-padding: 10 0;" />
+                  <Button text="View Patients →" onAction="#viewPatients" styleClass="btn-primary" maxWidth="Infinity" />
+               </VBox>
+
+               <!-- Doctors Card -->
+               <VBox styleClass="dashboard-card" minWidth="220" prefWidth="240">
+                  <HBox spacing="12" alignment="CENTER_LEFT">
+                     <Label text="🩺" styleClass="icon-root" style="-fx-font-size: 32px; -fx-text-fill: #10b981;" />
+                     <VBox spacing="2">
+                        <Label text="Doctors" styleClass="stat-label" />
+                        <Label text="Medical Staff" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" />
+                     </VBox>
+                  </HBox>
+                  <Label fx:id="doctorCountLabel" text="0" styleClass="stat-value" style="-fx-padding: 10 0;" />
+                  <Button text="View Doctors →" onAction="#viewDoctors" styleClass="btn-primary" maxWidth="Infinity" />
+               </VBox>
+
+               <!-- Appointments Card -->
+               <VBox styleClass="dashboard-card" minWidth="220" prefWidth="240">
+                  <HBox spacing="12" alignment="CENTER_LEFT">
+                     <Label text="📅" styleClass="icon-root" style="-fx-font-size: 32px; -fx-text-fill: #0ea5e9;" />
+                     <VBox spacing="2">
+                        <Label text="Appointments" styleClass="stat-label" />
+                        <Label text="Today's Schedule" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" />
+                     </VBox>
+                  </HBox>
+                  <Label fx:id="appointmentCountLabel" text="0" styleClass="stat-value" style="-fx-padding: 10 0;" />
+                  <Button text="View Schedule →" onAction="#viewAppointments" styleClass="btn-primary" maxWidth="Infinity" />
+               </VBox>
+
+               <!-- Inventory Card -->
+               <VBox styleClass="dashboard-card" minWidth="220" prefWidth="240">
+                  <HBox spacing="12" alignment="CENTER_LEFT">
+                     <Label text="📦" styleClass="icon-root" style="-fx-font-size: 32px; -fx-text-fill: #64748b;" />
+                     <VBox spacing="2">
+                        <Label text="Inventory" styleClass="stat-label" />
+                        <Label text="Medical Supplies" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" />
+                     </VBox>
+                  </HBox>
+                  <Label fx:id="inventoryCountLabel" text="0" styleClass="stat-value" style="-fx-padding: 10 0;" />
+                  <Button text="Check Stock →" onAction="#checkLowStock" styleClass="btn-primary" maxWidth="Infinity" />
+               </VBox>
+
+               <!-- Performance Card -->
+               <VBox styleClass="dashboard-card" minWidth="220" prefWidth="240">
+                  <HBox spacing="12" alignment="CENTER_LEFT">
+                     <Label text="⚡" styleClass="icon-root" style="-fx-font-size: 32px; -fx-text-fill: #ef4444;" />
+                     <VBox spacing="2">
+                        <Label text="Performance" styleClass="stat-label" />
+                        <Label text="System Metrics" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" />
+                     </VBox>
+                  </HBox>
+                  <Label text="Optimal" styleClass="stat-value" style="-fx-font-size: 24px; -fx-padding: 15 0;" />
+                  <Button text="View Report →" onAction="#generatePerformanceReport" styleClass="btn-primary" maxWidth="Infinity" style="-fx-background-color: #ef4444;" />
+               </VBox>
+
+               <!-- Database Card -->
+               <VBox styleClass="dashboard-card" minWidth="220" prefWidth="240">
+                  <HBox spacing="12" alignment="CENTER_LEFT">
+                     <Label text="📊" styleClass="icon-root" style="-fx-font-size: 32px; -fx-text-fill: #059669;" />
+                     <VBox spacing="2">
+                        <Label text="Database" styleClass="stat-label" />
+                        <Label text="Health Status" style="-fx-font-size: 11px; -fx-text-fill: #7f8c8d;" />
+                     </VBox>
+                  </HBox>
+                  <Label text="Connected " styleClass="stat-value" style="-fx-font-size: 24px; -fx-padding: 15 0;" />
+                  <Button text="Test Connection →" onAction="#showPerformanceStats" styleClass="btn-primary" maxWidth="Infinity" />
+               </VBox>
+            </FlowPane>
+
+            <!-- Recent Activity Section - Auto-flexible width -->
+            <VBox spacing="15" VBox.vgrow="NEVER" style="-fx-padding: 25; -fx-background-color: #f8fafc; -fx-background-radius: 12; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 12;">
+               <HBox alignment="CENTER_LEFT" spacing="10">
+                  <Label text="📋" style="-fx-font-size: 18px;" />
+                  <Label text="Recent System Activity" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;" />
+               </HBox>
+
+               <VBox spacing="10">
+                  <HBox spacing="12" style="-fx-padding: 12; -fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 5, 0, 0, 1);">
+                     <Label text="🔄" style="-fx-font-size: 16px; -fx-text-fill: #059669;" />
+                     <VBox spacing="2">
+                        <Label text="Database initialized with sample data" style="-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 13px;" />
+                        <Label text="Just now • System" style="-fx-font-size: 11px; -fx-text-fill: #64748b;" />
+                     </VBox>
+                  </HBox>
+
+                  <HBox spacing="12" style="-fx-padding: 12; -fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 5, 0, 0, 1);">
+                     <Label text="⚡" style="-fx-font-size: 16px; -fx-text-fill: #ef4444;" />
+                     <VBox spacing="2">
+                        <Label text="Caching system activated" style="-fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-font-size: 13px;" />
+                        <Label text="Just now • Performance" style="-fx-font-size: 11px; -fx-text-fill: #64748b;" />
+                     </VBox>
+                  </HBox>
+               </VBox>
+            </VBox>
+
+            <!-- Footer -->
+            <HBox spacing="12" alignment="CENTER" style="-fx-padding: 20 0 0 0; -fx-border-color: #e2e8f0; -fx-border-width: 1 0 0 0;">
+               <Label text="🏥 Hospital Management System v2.0" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" />
+               <Label text="•" style="-fx-text-fill: #cbd5e1; -fx-font-size: 11px;" />
+               <Label text="© 2026 Professional Edition" style="-fx-text-fill: #94a3b8; -fx-font-size: 11px;" />
+               <Label text="•" style="-fx-text-fill: #cbd5e1; -fx-font-size: 11px;" />
+               <Button text="ℹ️ About System" onAction="#showAbout"
+                       style="-fx-background-color: transparent; -fx-text-fill: #059669; -fx-font-size: 11px; -fx-padding: 0; -fx-cursor: hand;" />
+            </HBox>
+         </VBox>
+      </ScrollPane>
+   </HBox>
+</VBox>

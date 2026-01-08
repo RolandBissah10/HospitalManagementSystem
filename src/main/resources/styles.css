@@ -1,0 +1,248 @@
+/* Modern Design System for Hospital Management System */
+
+.root {
+    -fx-primary-color: #059669;
+    /* Deep Emerald */
+    -fx-secondary-color: #0f172a;
+    /* Graphite Slate */
+    -fx-accent-color: #10b981;
+    /* Bright Mint */
+    -fx-success-color: #34d399;
+    /* Soft Mint */
+    -fx-warning-color: #f59e0b;
+    /* Warm Amber */
+    -fx-bg-color: #f8fafc;
+    /* Pure Slate White */
+    -fx-card-bg: #ffffff;
+    /* White */
+    -fx-text-main: #334155;
+    /* Charcoal */
+}
+
+.main-container {
+    -fx-background-color: -fx-bg-color;
+    -fx-font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.logo-icon {
+    -fx-text-fill: white !important;
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.3), 8, 0.4, 0, 0);
+}
+
+/* Unified Professional Theme for Dashboard & Nav */
+.icon-patient,
+.nav-button .icon-patient {
+    -fx-text-fill: #059669 !important;
+}
+
+.icon-doctor,
+.nav-button .icon-doctor {
+    -fx-text-fill: #10b981 !important;
+}
+
+.icon-appointment,
+.nav-button .icon-appointment {
+    -fx-text-fill: #0ea5e9 !important;
+}
+
+.icon-inventory,
+.nav-button .icon-inventory {
+    -fx-text-fill: #64748b !important;
+}
+
+.icon-performance,
+.nav-button .icon-performance {
+    -fx-text-fill: #ef4444 !important;
+}
+
+.icon-database,
+.nav-button .icon-database {
+    -fx-text-fill: #059669 !important;
+}
+
+.icon-delete,
+.nav-button .icon-delete {
+    -fx-text-fill: #94a3b8 !important;
+}
+
+/* Side Navigation - Optimized for fitting */
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+    /* Precise size for sidebar fitting */
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 6 12;
+    -fx-min-height: 38;
+    -fx-pref-width: 200;
+    -fx-background-radius: 6;
+    -fx-transition: all 0.2s;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #f1f5f9;
+    -fx-translate-x: 4;
+}
+
+.nav-button-active {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    -fx-background-color: -fx-card-bg;
+    -fx-background-radius: 12;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.04), 8, 0, 0, 2);
+    -fx-cursor: hand;
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+.dashboard-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(5, 150, 105, 0.12), 12, 0, 0, 6);
+    -fx-translate-y: -2;
+    -fx-border-color: #d1fae5;
+}
+
+.stat-value {
+    -fx-font-size: 34px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0f172a;
+}
+
+.stat-label {
+    -fx-font-size: 15px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+}
+
+/* Buttons */
+.btn-primary {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 6;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #047857;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 6, 0, 0, 3);
+}
+
+.btn-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #3498db;
+    -fx-cursor: hand;
+    -fx-transition: all 0.2s;
+}
+
+.btn-link:hover {
+    -fx-text-fill: #2980b9;
+    -fx-underline: true;
+}
+
+/* ScrollPane Styling */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-width: 8;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 10;
+    -fx-min-height: 40;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #95a5a6;
+}
+
+/* Icon System */
+.icon-root {
+    -fx-font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "sans-serif";
+    -fx-font-weight: normal;
+}
+
+/* These classes now just enforce the font to be sure */
+.icon-blue {
+    -fx-text-fill: #3498db;
+    -fx-font-family: "Segoe UI Emoji";
+}
+
+.icon-green {
+    -fx-text-fill: #2ecc71;
+    -fx-font-family: "Segoe UI Emoji";
+}
+
+.icon-yellow {
+    -fx-text-fill: #f1c40f;
+    -fx-font-family: "Segoe UI Emoji";
+}
+
+.icon-red {
+    -fx-text-fill: #e74c3c;
+    -fx-font-family: "Segoe UI Emoji";
+}
+
+.icon-orange {
+    -fx-text-fill: #e67e22;
+    -fx-font-family: "Segoe UI Emoji";
+}
+
+.icon-purple {
+    -fx-text-fill: #9b59b6;
+    -fx-font-family: "Segoe UI Emoji";
+}
+
+.icon-teal {
+    -fx-text-fill: #1abc9c;
+    -fx-font-family: "Segoe UI Emoji";
+}
+
+/* Sidebar ScrollPane Styling */
+.sidebar-scroll {
+    -fx-background-color: #111827;
+    -fx-border-width: 0;
+}
+
+.sidebar-scroll>.viewport {
+    -fx-background-color: #111827;
+}
+
+.sidebar-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 6;
+}
+
+.sidebar-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 10;
+}
+
+.sidebar-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #334155;
+}
+
+.sidebar-scroll .scroll-bar .increment-button,
+.sidebar-scroll .scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
