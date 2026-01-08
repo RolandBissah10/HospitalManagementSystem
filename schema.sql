@@ -82,6 +82,8 @@ CREATE TABLE medical_inventory (
     unit VARCHAR(20)
 );
 
+
+
 -- Prescriptions
 ALTER TABLE prescriptions
     ADD COLUMN diagnosis TEXT,
