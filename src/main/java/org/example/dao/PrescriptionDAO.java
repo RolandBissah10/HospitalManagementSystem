@@ -244,6 +244,44 @@ public class PrescriptionDAO {
         return prescriptions;
     }
 
+    public List<Prescription> getPrescriptionsByDoctor(int doctorId) throws SQLException {
+        List<Prescription> prescriptions = new ArrayList<>();
+        String sql = "SELECT p.*, pat.first_name as patient_first_name, pat.last_name as patient_last_name " +
+                "FROM prescriptions p " +
+                "LEFT JOIN patients pat ON p.patient_id = pat.id " +
+                "WHERE p.doctor_id = ? ORDER BY p.prescription_date DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, doctorId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Prescription prescription = new Prescription(
+                        rs.getInt("id"),
+                        rs.getInt("patient_id"),
+                        rs.getInt("doctor_id"),
+                        rs.getDate("prescription_date").toLocalDate());
+
+                String diagnosis = rs.getString("diagnosis");
+                if (diagnosis != null) {
+                    prescription.setDiagnosis(diagnosis);
+                }
+
+                String notes = rs.getString("notes");
+                if (notes != null) {
+                    prescription.setNotes(notes);
+                }
+
+                prescription.setPatientName(
+                        rs.getString("patient_first_name") + " " + rs.getString("patient_last_name"));
+                prescriptions.add(prescription);
+            }
+        }
+        return prescriptions;
+    }
+
     public List<Prescription> getAllPrescriptions() throws SQLException {
         List<Prescription> prescriptions = new ArrayList<>();
         String sql = "SELECT p.*, " +

@@ -246,3 +246,98 @@
     -fx-padding: 0;
     -fx-background-color: transparent;
 }
+
+/* TabPane Styling */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area {
+    -fx-padding: 0 0 0 20;
+    -fx-background-color: white;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.tab {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 12 20;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.tab:hover {
+    -fx-background-color: #f8fafc;
+}
+
+.tab:selected {
+    -fx-background-color: transparent;
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-alignment: CENTER;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: -fx-primary-color;
+    -fx-font-weight: 700;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: #f8fafc;
+    -fx-padding: 0;
+}
+
+/* Custom Alert Styling */
+.custom-alert {
+    -fx-background-color: white;
+}
+
+.custom-alert .dialog-pane {
+    -fx-background-color: white;
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 4);
+}
+
+.custom-alert .dialog-pane .header-panel {
+    -fx-background-color: -fx-bg-color;
+    -fx-padding: 15;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 0 1 0;
+}
+
+.custom-alert .dialog-pane .header-panel .label {
+    -fx-text-fill: -fx-secondary-color;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.custom-alert .dialog-pane .content {
+    -fx-padding: 20;
+    -fx-background-color: white;
+}
+
+.custom-alert .dialog-pane .content .label {
+    -fx-text-fill: -fx-text-main;
+    -fx-font-size: 14px;
+}
+
+.custom-alert .dialog-pane .button-bar .button {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.custom-alert .dialog-pane .button-bar .button:hover {
+    -fx-background-color: #047857;
+}

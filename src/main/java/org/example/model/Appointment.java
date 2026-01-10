@@ -13,11 +13,14 @@ public class Appointment {
     private String reason;
     private String notes;
     private int durationMinutes = 30;
+    private String patientName;
+    private String doctorName;
 
-    public Appointment() {}
+    public Appointment() {
+    }
 
     public Appointment(int id, int patientId, int doctorId, LocalDate appointmentDate,
-                       LocalTime appointmentTime, String status) {
+            LocalTime appointmentTime, String status) {
         this.id = id;
         this.patientId = patientId;
         this.doctorId = doctorId;
@@ -27,36 +30,99 @@ public class Appointment {
     }
 
     // Getters and Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public int getPatientId() { return patientId; }
-    public void setPatientId(int patientId) { this.patientId = patientId; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public int getDoctorId() { return doctorId; }
-    public void setDoctorId(int doctorId) { this.doctorId = doctorId; }
+    public int getPatientId() {
+        return patientId;
+    }
 
-    public LocalDate getAppointmentDate() { return appointmentDate; }
-    public void setAppointmentDate(LocalDate appointmentDate) { this.appointmentDate = appointmentDate; }
+    public void setPatientId(int patientId) {
+        this.patientId = patientId;
+    }
 
-    public LocalTime getAppointmentTime() { return appointmentTime; }
-    public void setAppointmentTime(LocalTime appointmentTime) { this.appointmentTime = appointmentTime; }
+    public int getDoctorId() {
+        return doctorId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setDoctorId(int doctorId) {
+        this.doctorId = doctorId;
+    }
 
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
+    public LocalDate getAppointmentDate() {
+        return appointmentDate;
+    }
 
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
+    public void setAppointmentDate(LocalDate appointmentDate) {
+        this.appointmentDate = appointmentDate;
+    }
 
-    public int getDurationMinutes() { return durationMinutes; }
-    public void setDurationMinutes(int durationMinutes) { this.durationMinutes = durationMinutes; }
+    public LocalTime getAppointmentTime() {
+        return appointmentTime;
+    }
+
+    public void setAppointmentTime(LocalTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public int getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(int durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
+    public String getDoctorName() {
+        return doctorName;
+    }
+
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
+    }
 
     @Override
     public String toString() {
         return "Appointment on " + appointmentDate + " at " + appointmentTime +
-                " with Doctor ID " + doctorId + " (" + status + ")";
+                " with Doctor " + (doctorName != null ? doctorName : "ID " + doctorId) +
+                " for Patient " + (patientName != null ? patientName : "ID " + patientId) +
+                " (" + status + ")";
     }
 }

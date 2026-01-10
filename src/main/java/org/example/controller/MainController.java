@@ -16,6 +16,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.application.Platform;
 
 import org.example.model.*;
 import org.example.service.*;
@@ -337,33 +338,29 @@ public class MainController {
             TableView<Doctor> tableView = new TableView<>();
             tableView.setItems(FXCollections.observableArrayList(doctors));
 
-            TableColumn<Doctor, Integer> idColumn = new TableColumn<>("ID");
-            idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-            idColumn.setPrefWidth(50);
-
             TableColumn<Doctor, String> nameColumn = new TableColumn<>("Name");
             nameColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                     "Dr. " + cell.getValue().getFirstName() + " " + cell.getValue().getLastName()));
-            nameColumn.setPrefWidth(150);
+            nameColumn.setPrefWidth(180);
 
             TableColumn<Doctor, String> specialtyColumn = new TableColumn<>("Specialty");
             specialtyColumn.setCellValueFactory(new PropertyValueFactory<>("specialty"));
-            specialtyColumn.setPrefWidth(120);
+            specialtyColumn.setPrefWidth(140);
 
             TableColumn<Doctor, String> deptColumn = new TableColumn<>("Department");
             deptColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                     deptMap.getOrDefault(cell.getValue().getDepartmentId(), "Unknown")));
-            deptColumn.setPrefWidth(120);
+            deptColumn.setPrefWidth(140);
 
             TableColumn<Doctor, String> phoneColumn = new TableColumn<>("Phone");
             phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
-            phoneColumn.setPrefWidth(120);
+            phoneColumn.setPrefWidth(130);
 
             TableColumn<Doctor, String> emailColumn = new TableColumn<>("Email");
             emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
-            emailColumn.setPrefWidth(150);
+            emailColumn.setPrefWidth(180);
 
-            tableView.getColumns().addAll(idColumn, nameColumn, specialtyColumn, deptColumn, phoneColumn, emailColumn);
+            tableView.getColumns().addAll(nameColumn, specialtyColumn, deptColumn, phoneColumn, emailColumn);
 
             Scene scene = new Scene(tableView, 750, 400);
             stage.setScene(scene);
@@ -539,32 +536,27 @@ public class MainController {
             ObservableList<Appointment> appointmentList = FXCollections.observableArrayList(appointments);
             tableView.setItems(appointmentList);
 
-            TableColumn<Appointment, Integer> idColumn = new TableColumn<>("ID");
-            idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-            idColumn.setPrefWidth(50);
+            TableColumn<Appointment, String> patientColumn = new TableColumn<>("Patient");
+            patientColumn.setCellValueFactory(new PropertyValueFactory<>("patientName"));
+            patientColumn.setPrefWidth(150);
 
-            TableColumn<Appointment, Integer> patientIdColumn = new TableColumn<>("Patient ID");
-            patientIdColumn.setCellValueFactory(new PropertyValueFactory<>("patientId"));
-            patientIdColumn.setPrefWidth(70);
-
-            TableColumn<Appointment, Integer> doctorIdColumn = new TableColumn<>("Doctor ID");
-            doctorIdColumn.setCellValueFactory(new PropertyValueFactory<>("doctorId"));
-            doctorIdColumn.setPrefWidth(70);
+            TableColumn<Appointment, String> doctorColumn = new TableColumn<>("Doctor");
+            doctorColumn.setCellValueFactory(new PropertyValueFactory<>("doctorName"));
+            doctorColumn.setPrefWidth(150);
 
             TableColumn<Appointment, LocalDate> dateColumn = new TableColumn<>("Date");
             dateColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDate"));
-            dateColumn.setPrefWidth(100);
+            dateColumn.setPrefWidth(110);
 
             TableColumn<Appointment, LocalTime> timeColumn = new TableColumn<>("Time");
             timeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTime"));
-            timeColumn.setPrefWidth(100);
+            timeColumn.setPrefWidth(90);
 
             TableColumn<Appointment, String> statusColumn = new TableColumn<>("Status");
             statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
             statusColumn.setPrefWidth(100);
 
-            tableView.getColumns().addAll(idColumn, patientIdColumn, doctorIdColumn, dateColumn, timeColumn,
-                    statusColumn);
+            tableView.getColumns().addAll(patientColumn, doctorColumn, dateColumn, timeColumn, statusColumn);
 
             Scene scene = new Scene(tableView, 600, 400);
             stage.setScene(scene);
@@ -578,18 +570,52 @@ public class MainController {
     // Additional methods that were in your original controller but not in FXML
     @FXML
     private void searchPatients() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Search Patients");
-        dialog.setHeaderText("Search by name");
-        dialog.setContentText("Enter patient name (full or partial):");
+        // Create custom dialog with better visual indicators
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("🔍 Patient Search");
+        dialog.setHeaderText("Quick Patient Lookup");
+
+        // Set the button types
+        ButtonType searchButtonType = new ButtonType("Search", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(searchButtonType, ButtonType.CANCEL);
+
+        // Create the content
+        VBox content = new VBox(10);
+        content.setPadding(new javafx.geometry.Insets(20));
+
+        Label instructionLabel = new Label("Search by Patient Name or ID:");
+        instructionLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+        Label helpLabel = new Label("💡 Tip: Enter a number to search by ID, or text to search by name");
+        helpLabel.setStyle("-fx-text-fill: #059669; -fx-font-size: 12px;");
+
+        TextField searchField = new TextField();
+        searchField.setPromptText("e.g., 'John Smith' or '123'");
+        searchField.setPrefWidth(300);
+        searchField.setStyle("-fx-font-size: 13px; -fx-padding: 8;");
+
+        content.getChildren().addAll(instructionLabel, helpLabel, searchField);
+        dialog.getDialogPane().setContent(content);
+
+        // Focus on text field
+        Platform.runLater(() -> searchField.requestFocus());
+
+        // Convert the result
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == searchButtonType) {
+                return searchField.getText();
+            }
+            return null;
+        });
 
         Optional<String> result = dialog.showAndWait();
+
         if (result.isPresent() && !result.get().isEmpty()) {
             String searchTerm = result.get().trim();
 
             // Validate search term
-            if (searchTerm.length() < 2) {
-                showAlert("Validation Error", "Search term must be at least 2 characters", Alert.AlertType.ERROR);
+            if (searchTerm.length() < 1) {
+                showAlert("Validation Error", "Please enter a search term", Alert.AlertType.ERROR);
                 return;
             }
 
@@ -600,15 +626,27 @@ public class MainController {
             }
 
             try {
-                List<Patient> patients = patientService.searchPatients(searchTerm);
+                List<Patient> patients;
+                String searchType;
+
+                // If input looks like an email, search by email
+                if (searchTerm.contains("@")) {
+                    Patient p = patientService.getPatient(searchTerm);
+                    patients = (p != null) ? List.of(p) : new ArrayList<>();
+                    searchType = "Email: " + searchTerm;
+                } else {
+                    // Otherwise search by name
+                    patients = patientService.searchPatients(searchTerm);
+                    searchType = "Name: \"" + searchTerm + "\"";
+                }
 
                 if (patients.isEmpty()) {
-                    showAlert("No Results", "No patients found with name containing: " + searchTerm,
+                    showAlert("No Results", "No patients found matching " + searchType,
                             Alert.AlertType.INFORMATION);
                     return;
                 }
 
-                showPatientTable("Search Results for: \"" + searchTerm + "\"", patients);
+                showPatientTable("🔍 Search Results - " + searchType + " (" + patients.size() + " found)", patients);
 
             } catch (SQLException e) {
                 showAlert("Database Error", "Search failed: " + e.getMessage(), Alert.AlertType.ERROR);
@@ -617,20 +655,180 @@ public class MainController {
     }
 
     @FXML
+    private void searchAppointments() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Search Appointments");
+        dialog.setHeaderText("Search by Patient or Doctor Name");
+        dialog.setContentText("Enter name:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().isEmpty()) {
+            String searchTerm = result.get().trim();
+            try {
+                List<Appointment> allAppointments = appointmentService.getAllAppointments();
+                List<Appointment> filtered = allAppointments.stream()
+                        .filter(a -> (a.getPatientName() != null
+                                && a.getPatientName().toLowerCase().contains(searchTerm.toLowerCase())) ||
+                                (a.getDoctorName() != null
+                                        && a.getDoctorName().toLowerCase().contains(searchTerm.toLowerCase())))
+                        .toList();
+
+                if (filtered.isEmpty()) {
+                    showAlert("No Results", "No appointments found matching: " + searchTerm,
+                            Alert.AlertType.INFORMATION);
+                    return;
+                }
+
+                showAppointmentTable("Search Results for: " + searchTerm, filtered);
+
+            } catch (SQLException e) {
+                showAlert("Database Error", "Search failed: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    @FXML
+    private void searchPrescriptions() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Search Prescriptions");
+        dialog.setHeaderText("Search by Patient Name");
+        dialog.setContentText("Enter patient name:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().isEmpty()) {
+            String searchTerm = result.get().trim();
+            try {
+                // Use the service method if available, otherwise filter explicitly
+                List<Prescription> allPrescriptions = prescriptionService.getAllPrescriptions();
+                List<Prescription> filtered = allPrescriptions.stream()
+                        .filter(p -> p.getPatientName() != null
+                                && p.getPatientName().toLowerCase().contains(searchTerm.toLowerCase()))
+                        .toList();
+
+                if (filtered.isEmpty()) {
+                    showAlert("No Results", "No prescriptions found for: " + searchTerm, Alert.AlertType.INFORMATION);
+                    return;
+                }
+                showPrescriptionTable("Search Results for: " + searchTerm, filtered);
+
+            } catch (SQLException e) {
+                showAlert("Error", "Search failed: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    @FXML
+    private void searchInventory() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Search Inventory");
+        dialog.setHeaderText("Search by Item Name");
+        dialog.setContentText("Enter item name:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().isEmpty()) {
+            String searchTerm = result.get().trim();
+            try {
+                // Correct logic using MedicalInventory and existing inventoryDAO
+                List<MedicalInventory> allItems = inventoryDAO.getAllInventory();
+                List<MedicalInventory> filtered = allItems.stream()
+                        .filter(i -> i.getItemName().toLowerCase().contains(searchTerm.toLowerCase()))
+                        .toList();
+
+                if (filtered.isEmpty()) {
+                    showAlert("No Results", "No items found matching: " + searchTerm, Alert.AlertType.INFORMATION);
+                    return;
+                }
+                showInventoryTable("Search Results for: " + searchTerm, filtered);
+
+            } catch (SQLException e) {
+                showAlert("Error", "Search failed: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    // Helper methods for showing search results
+
+    private void showAppointmentTable(String title, List<Appointment> appointments) {
+        Stage stage = new Stage();
+        stage.setTitle(title);
+        TableView<Appointment> table = new TableView<>();
+        ObservableList<Appointment> data = FXCollections.observableArrayList(appointments);
+
+        TableColumn<Appointment, String> patCol = new TableColumn<>("Patient");
+        patCol.setCellValueFactory(new PropertyValueFactory<>("patientName"));
+
+        TableColumn<Appointment, String> docCol = new TableColumn<>("Doctor");
+        docCol.setCellValueFactory(new PropertyValueFactory<>("doctorName"));
+
+        TableColumn<Appointment, String> dateCol = new TableColumn<>("Date");
+        dateCol.setCellValueFactory(new PropertyValueFactory<>("appointmentDate"));
+
+        TableColumn<Appointment, String> timeCol = new TableColumn<>("Time");
+        timeCol.setCellValueFactory(new PropertyValueFactory<>("appointmentTime"));
+
+        table.getColumns().addAll(patCol, docCol, dateCol, timeCol);
+        table.setItems(data);
+
+        Scene scene = new Scene(table, 600, 400);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void showPrescriptionTable(String title, List<Prescription> prescriptions) {
+        Stage stage = new Stage();
+        stage.setTitle(title);
+        TableView<Prescription> table = new TableView<>();
+        ObservableList<Prescription> data = FXCollections.observableArrayList(prescriptions);
+
+        TableColumn<Prescription, String> patCol = new TableColumn<>("Patient");
+        patCol.setCellValueFactory(new PropertyValueFactory<>("patientName"));
+
+        TableColumn<Prescription, String> docCol = new TableColumn<>("Doctor");
+        docCol.setCellValueFactory(new PropertyValueFactory<>("doctorName"));
+
+        table.getColumns().addAll(patCol, docCol);
+        table.setItems(data);
+
+        Scene scene = new Scene(table, 600, 400);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    private void showInventoryTable(String title, List<MedicalInventory> items) {
+        Stage stage = new Stage();
+        stage.setTitle(title);
+        TableView<MedicalInventory> table = new TableView<>();
+        ObservableList<MedicalInventory> data = FXCollections.observableArrayList(items);
+
+        TableColumn<MedicalInventory, String> nameCol = new TableColumn<>("Item");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("itemName"));
+
+        TableColumn<MedicalInventory, Integer> qtyCol = new TableColumn<>("Quantity");
+        qtyCol.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+
+        table.getColumns().addAll(nameCol, qtyCol);
+        table.setItems(data);
+
+        Scene scene = new Scene(table, 600, 400);
+        stage.setScene(scene);
+        stage.show();
+    }
+
+    @FXML
     private void updatePatient() {
         try {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Update Patient");
-            dialog.setHeaderText("Enter Patient ID to update:");
-            dialog.setContentText("Patient ID:");
+            dialog.setHeaderText("Enter Patient email to update:");
+            dialog.setContentText("Patient Email:");
 
-            Optional<String> idResult = dialog.showAndWait();
-            if (idResult.isPresent() && !idResult.get().isEmpty()) {
-                int patientId = Integer.parseInt(idResult.get());
+            Optional<String> emailResult = dialog.showAndWait();
+            if (emailResult.isPresent() && !emailResult.get().isEmpty()) {
+                String patientEmail = emailResult.get().trim();
 
-                Patient patient = patientService.getPatient(patientId);
+                Patient patient = patientService.getPatient(patientEmail);
                 if (patient == null) {
-                    showAlert("Not Found", "Patient with ID " + patientId + " not found.", Alert.AlertType.ERROR);
+                    showAlert("Not Found", "Patient with email " + patientEmail + " not found.", Alert.AlertType.ERROR);
                     return;
                 }
 
@@ -685,7 +883,8 @@ public class MainController {
                 Optional<Patient> result = updateDialog.showAndWait();
                 result.ifPresent(updatedPatient -> {
                     try {
-                        patientService.updatePatient(updatedPatient);
+                        String originalEmail = patientEmail;
+                        patientService.updatePatient(updatedPatient, originalEmail);
                         refreshDashboard();
                         showAlert("Success", "Patient updated successfully!", Alert.AlertType.INFORMATION);
                     } catch (SQLException e) {
@@ -694,12 +893,10 @@ public class MainController {
                     }
                 });
             }
-        } catch (NumberFormatException e) {
-            showAlert("Input Error", "Please enter a valid numeric ID", Alert.AlertType.ERROR);
         } catch (SQLException e) {
             showAlert("Database Error", "Failed to update patient: " + e.getMessage(), Alert.AlertType.ERROR);
         } catch (Exception e) {
-            showAlert("Error", "Cannot update patient: " + e.getMessage(), Alert.AlertType.ERROR);
+            showAlert("Input Error", "Please enter a valid email address: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -745,10 +942,6 @@ public class MainController {
         ObservableList<Patient> patientList = FXCollections.observableArrayList(patients);
         tableView.setItems(patientList);
 
-        TableColumn<Patient, Integer> idColumn = new TableColumn<>("ID");
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-        idColumn.setPrefWidth(50);
-
         TableColumn<Patient, String> firstNameColumn = new TableColumn<>("First Name");
         firstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         firstNameColumn.setPrefWidth(100);
@@ -769,11 +962,156 @@ public class MainController {
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
         emailColumn.setPrefWidth(150);
 
-        tableView.getColumns().addAll(idColumn, firstNameColumn, lastNameColumn, dobColumn, phoneColumn, emailColumn);
+        // Add Actions column with "View History" button
+        TableColumn<Patient, Void> actionsColumn = new TableColumn<>("Actions");
+        actionsColumn.setPrefWidth(120);
+        actionsColumn.setCellFactory(param -> new TableCell<>() {
+            private final Button viewHistoryBtn = new Button("View History");
 
-        Scene scene = new Scene(tableView, 700, 400);
+            {
+                viewHistoryBtn.setOnAction(event -> {
+                    Patient patient = getTableView().getItems().get(getIndex());
+                    showMedicalHistory(patient);
+                });
+                viewHistoryBtn.setStyle(
+                        "-fx-background-color: #059669; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(viewHistoryBtn);
+                }
+            }
+        });
+
+        tableView.getColumns().addAll(firstNameColumn, lastNameColumn, dobColumn, phoneColumn, emailColumn,
+                actionsColumn);
+
+        Scene scene = new Scene(tableView, 820, 400);
         stage.setScene(scene);
         stage.show();
+    }
+
+    private void showMedicalHistory(Patient patient) {
+        Stage historyStage = new Stage();
+        historyStage.setTitle("Medical History - " + patient.getFirstName() + " " + patient.getLastName());
+
+        VBox mainContainer = new VBox(15);
+        mainContainer.setPadding(new javafx.geometry.Insets(20));
+        mainContainer.setStyle("-fx-background-color: #f8fafc;");
+
+        // Patient Info Header
+        VBox headerBox = new VBox(5);
+        headerBox.setStyle(
+                "-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;");
+        Label nameLabel = new Label("Patient: " + patient.getFirstName() + " " + patient.getLastName());
+        nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+        Label dobLabel = new Label("DOB: " + patient.getDateOfBirth() + " | Phone: " + patient.getPhone());
+        dobLabel.setStyle("-fx-text-fill: #64748b;");
+        headerBox.getChildren().addAll(nameLabel, dobLabel);
+
+        // Appointments Section
+        Label appointmentsTitle = new Label("📅 Appointment History");
+        appointmentsTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+
+        TableView<Appointment> appointmentsTable = new TableView<>();
+        appointmentsTable.setPrefHeight(200);
+
+        try {
+            List<Appointment> appointments = appointmentService.getAllAppointments().stream()
+                    .filter(a -> a.getPatientId() == patient.getId())
+                    .collect(java.util.stream.Collectors.toList());
+            appointmentsTable.setItems(FXCollections.observableArrayList(appointments));
+
+            TableColumn<Appointment, LocalDate> dateCol = new TableColumn<>("Date");
+            dateCol.setCellValueFactory(new PropertyValueFactory<>("appointmentDate"));
+            dateCol.setPrefWidth(100);
+
+            TableColumn<Appointment, LocalTime> timeCol = new TableColumn<>("Time");
+            timeCol.setCellValueFactory(new PropertyValueFactory<>("appointmentTime"));
+            timeCol.setPrefWidth(80);
+
+            TableColumn<Appointment, String> doctorCol = new TableColumn<>("Doctor");
+            doctorCol.setCellValueFactory(new PropertyValueFactory<>("doctorName"));
+            doctorCol.setPrefWidth(150);
+
+            TableColumn<Appointment, String> statusCol = new TableColumn<>("Status");
+            statusCol.setCellValueFactory(new PropertyValueFactory<>("status"));
+            statusCol.setPrefWidth(100);
+
+            TableColumn<Appointment, String> reasonCol = new TableColumn<>("Reason");
+            reasonCol.setCellValueFactory(new PropertyValueFactory<>("reason"));
+            reasonCol.setPrefWidth(200);
+
+            appointmentsTable.getColumns().addAll(dateCol, timeCol, doctorCol, statusCol, reasonCol);
+
+        } catch (SQLException e) {
+            showAlert("Error", "Failed to load appointments: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+
+        // Prescriptions Section
+        Label prescriptionsTitle = new Label("💊 Prescription History");
+        prescriptionsTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0f172a;");
+
+        TableView<Prescription> prescriptionsTable = new TableView<>();
+        prescriptionsTable.setPrefHeight(200);
+
+        try {
+            List<Prescription> prescriptions = prescriptionService.getAllPrescriptions().stream()
+                    .filter(p -> p.getPatientId() == patient.getId())
+                    .collect(java.util.stream.Collectors.toList());
+            prescriptionsTable.setItems(FXCollections.observableArrayList(prescriptions));
+
+            TableColumn<Prescription, LocalDate> rxDateCol = new TableColumn<>("Date");
+            rxDateCol.setCellValueFactory(new PropertyValueFactory<>("prescriptionDate"));
+            rxDateCol.setPrefWidth(120);
+
+            TableColumn<Prescription, String> rxDoctorCol = new TableColumn<>("Prescribed By");
+            rxDoctorCol.setCellValueFactory(cellData -> {
+                try {
+                    Doctor doctor = doctorService.getDoctorById(cellData.getValue().getDoctorId());
+                    return new javafx.beans.property.SimpleStringProperty(
+                            doctor != null ? "Dr. " + doctor.getFirstName() + " " + doctor.getLastName() : "Unknown");
+                } catch (SQLException e) {
+                    return new javafx.beans.property.SimpleStringProperty("Error");
+                }
+            });
+            rxDoctorCol.setPrefWidth(170);
+
+            TableColumn<Prescription, String> instructionsCol = new TableColumn<>("Instructions");
+            instructionsCol.setCellValueFactory(new PropertyValueFactory<>("instructions"));
+            instructionsCol.setPrefWidth(280);
+
+            prescriptionsTable.getColumns().addAll(rxDateCol, rxDoctorCol, instructionsCol);
+
+        } catch (SQLException e) {
+            showAlert("Error", "Failed to load prescriptions: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+
+        Button closeBtn = new Button("Close");
+        closeBtn.setStyle(
+                "-fx-background-color: #059669; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 30;");
+        closeBtn.setOnAction(e -> historyStage.close());
+
+        mainContainer.getChildren().addAll(
+                headerBox,
+                appointmentsTitle,
+                appointmentsTable,
+                prescriptionsTitle,
+                prescriptionsTable,
+                closeBtn);
+
+        ScrollPane scrollPane = new ScrollPane(mainContainer);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background-color: #f8fafc;");
+
+        Scene scene = new Scene(scrollPane, 700, 650);
+        historyStage.setScene(scene);
+        historyStage.show();
     }
 
     // Add these methods to your existing MainController class
@@ -805,20 +1143,16 @@ public class MainController {
                 ObservableList<Doctor> doctorList = FXCollections.observableArrayList(doctors);
                 tableView.setItems(doctorList);
 
-                TableColumn<Doctor, Integer> idColumn = new TableColumn<>("ID");
-                idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-                idColumn.setPrefWidth(50);
-
                 TableColumn<Doctor, String> nameColumn = new TableColumn<>("Name");
                 nameColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                         "Dr. " + cell.getValue().getFirstName() + " " + cell.getValue().getLastName()));
-                nameColumn.setPrefWidth(150);
+                nameColumn.setPrefWidth(200);
 
                 TableColumn<Doctor, String> specialtyColumn = new TableColumn<>("Specialty");
                 specialtyColumn.setCellValueFactory(new PropertyValueFactory<>("specialty"));
-                specialtyColumn.setPrefWidth(150);
+                specialtyColumn.setPrefWidth(180);
 
-                tableView.getColumns().addAll(idColumn, nameColumn, specialtyColumn);
+                tableView.getColumns().addAll(nameColumn, specialtyColumn);
 
                 Scene scene = new Scene(tableView, 400, 300);
                 stage.setScene(scene);
@@ -833,18 +1167,18 @@ public class MainController {
     @FXML
     public void updateDoctor() {
         try {
-            TextInputDialog idDialog = new TextInputDialog();
-            idDialog.setTitle("Update Doctor");
-            idDialog.setHeaderText("Enter Doctor ID to update:");
-            idDialog.setContentText("Doctor ID:");
+            TextInputDialog emailDialog = new TextInputDialog();
+            emailDialog.setTitle("Update Doctor");
+            emailDialog.setHeaderText("Enter Doctor email to update:");
+            emailDialog.setContentText("Doctor Email:");
 
-            Optional<String> idResult = idDialog.showAndWait();
-            if (idResult.isPresent() && !idResult.get().isEmpty()) {
-                int doctorId = Integer.parseInt(idResult.get());
+            Optional<String> emailResult = emailDialog.showAndWait();
+            if (emailResult.isPresent() && !emailResult.get().isEmpty()) {
+                String doctorEmail = emailResult.get().trim();
 
-                Doctor doctor = doctorService.getDoctor(doctorId);
+                Doctor doctor = doctorService.getDoctor(doctorEmail);
                 if (doctor == null) {
-                    showAlert("Not Found", "Doctor with ID " + doctorId + " not found.", Alert.AlertType.ERROR);
+                    showAlert("Not Found", "Doctor with email " + doctorEmail + " not found.", Alert.AlertType.ERROR);
                     return;
                 }
 
@@ -915,7 +1249,8 @@ public class MainController {
                 Optional<Doctor> result = updateDialog.showAndWait();
                 result.ifPresent(updatedDoctor -> {
                     try {
-                        doctorService.updateDoctor(updatedDoctor);
+                        String originalEmail = doctorEmail;
+                        doctorService.updateDoctor(updatedDoctor, originalEmail);
                         refreshDashboard();
                         showAlert("Success", "Doctor updated.", Alert.AlertType.INFORMATION);
                     } catch (SQLException e) {
@@ -923,10 +1258,10 @@ public class MainController {
                     }
                 });
             }
-        } catch (NumberFormatException e) {
-            showAlert("Input Error", "Please enter a valid numeric ID", Alert.AlertType.ERROR);
+        } catch (SQLException e) {
+            showAlert("Database Error", "Failed to update doctor: " + e.getMessage(), Alert.AlertType.ERROR);
         } catch (Exception e) {
-            showAlert("Error", "Action failed: " + e.getMessage(), Alert.AlertType.ERROR);
+            showAlert("Input Error", "Please enter a valid email address: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -935,43 +1270,35 @@ public class MainController {
         try {
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Delete Doctor");
-            dialog.setHeaderText("Enter Doctor ID to delete:");
-            dialog.setContentText("Doctor ID:");
+            dialog.setHeaderText("Enter Doctor email to delete:");
+            dialog.setContentText("Doctor Email:");
 
-            Optional<String> idResult = dialog.showAndWait();
-            if (idResult.isPresent() && !idResult.get().isEmpty()) {
-                if (!ValidationUtils.isValidId(idResult.get())) {
-                    showAlert("Validation Error", "Invalid Doctor ID: " + ValidationUtils.getIdErrorMessage(),
-                            Alert.AlertType.ERROR);
-                    return;
-                }
-
-                int doctorId = Integer.parseInt(idResult.get());
+            Optional<String> emailResult = dialog.showAndWait();
+            if (emailResult.isPresent() && !emailResult.get().isEmpty()) {
+                String doctorEmail = emailResult.get().trim();
 
                 // Get doctor details to show confirmation
-                Doctor doctor = doctorService.getDoctor(doctorId);
+                Doctor doctor = doctorService.getDoctor(doctorEmail);
                 if (doctor == null) {
-                    showAlert("Not Found", "Doctor with ID " + doctorId + " not found.", Alert.AlertType.ERROR);
+                    showAlert("Not Found", "Doctor with email " + doctorEmail + " not found.", Alert.AlertType.ERROR);
                     return;
                 }
 
                 // Confirm deletion
                 Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
                 confirmAlert.setTitle("Confirm Deletion");
-                confirmAlert.setHeaderText("Delete Doctor ID: " + doctorId);
+                confirmAlert.setHeaderText("Delete Doctor Email: " + doctorEmail);
                 confirmAlert.setContentText("Are you sure you want to delete Dr. " +
                         doctor.getFirstName() + " " + doctor.getLastName() +
                         " (" + doctor.getSpecialty() + ")?");
 
                 Optional<ButtonType> result = confirmAlert.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    doctorService.deleteDoctor(doctorId);
+                    doctorService.deleteDoctor(doctor.getId());
                     refreshDashboard();
                     showAlert("Success", "Doctor deleted successfully!", Alert.AlertType.INFORMATION);
                 }
             }
-        } catch (NumberFormatException e) {
-            showAlert("Input Error", "Please enter a valid numeric ID", Alert.AlertType.ERROR);
         } catch (SQLException e) {
             showAlert("Database Error", "Failed to delete doctor: " + e.getMessage(), Alert.AlertType.ERROR);
         } catch (Exception e) {
@@ -1446,25 +1773,21 @@ public class MainController {
             TableView<Prescription> tableView = new TableView<>();
 
             // Create columns
-            TableColumn<Prescription, Integer> idColumn = new TableColumn<>("ID");
-            idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-            idColumn.setPrefWidth(50);
-
             TableColumn<Prescription, String> patientColumn = new TableColumn<>("Patient");
             patientColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                     cell.getValue().getPatientName() != null ? cell.getValue().getPatientName()
                             : "Patient ID: " + cell.getValue().getPatientId()));
-            patientColumn.setPrefWidth(150);
+            patientColumn.setPrefWidth(180);
 
             TableColumn<Prescription, String> doctorColumn = new TableColumn<>("Doctor");
             doctorColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                     cell.getValue().getDoctorName() != null ? cell.getValue().getDoctorName()
                             : "Doctor ID: " + cell.getValue().getDoctorId()));
-            doctorColumn.setPrefWidth(150);
+            doctorColumn.setPrefWidth(180);
 
             TableColumn<Prescription, LocalDate> dateColumn = new TableColumn<>("Date");
             dateColumn.setCellValueFactory(new PropertyValueFactory<>("prescriptionDate"));
-            dateColumn.setPrefWidth(100);
+            dateColumn.setPrefWidth(110);
 
             // Updated diagnosis column to handle null values
             TableColumn<Prescription, String> diagnosisColumn = new TableColumn<>("Diagnosis");
@@ -1473,9 +1796,9 @@ public class MainController {
                 return new SimpleStringProperty(
                         diagnosis != null && !diagnosis.isEmpty() ? diagnosis : "Not specified");
             });
-            diagnosisColumn.setPrefWidth(200);
+            diagnosisColumn.setPrefWidth(230);
 
-            tableView.getColumns().addAll(idColumn, patientColumn, doctorColumn, dateColumn, diagnosisColumn);
+            tableView.getColumns().addAll(patientColumn, doctorColumn, dateColumn, diagnosisColumn);
 
             // View details button
             Button viewDetailsBtn = new Button("View Details");
@@ -1699,6 +2022,430 @@ public class MainController {
         }
     }
 
+    @FXML
+    private void viewDoctorPrescriptions() {
+        try {
+            // Ask for doctor email to filter prescriptions
+            TextInputDialog emailDialog = new TextInputDialog();
+            emailDialog.setTitle("View Doctor Prescriptions");
+            emailDialog.setHeaderText("Enter Doctor email to view prescriptions:");
+            emailDialog.setContentText("Doctor Email:");
+
+            Optional<String> emailResult = emailDialog.showAndWait();
+            if (emailResult.isPresent() && !emailResult.get().isEmpty()) {
+                String doctorEmail = emailResult.get().trim();
+                Doctor doctor = doctorService.getDoctor(doctorEmail);
+
+                if (doctor == null) {
+                    showAlert("Not Found", "Doctor with email " + doctorEmail + " not found.", Alert.AlertType.ERROR);
+                    return;
+                }
+
+                List<Prescription> prescriptions = prescriptionService.getPrescriptionsByDoctor(doctor.getId());
+
+                Stage stage = new Stage();
+                stage.setTitle("Prescriptions - Dr. " + doctor.getFirstName() + " " + doctor.getLastName());
+
+                VBox mainBox = new VBox(10);
+                mainBox.setPadding(new Insets(10));
+
+                TableView<Prescription> tableView = new TableView<>();
+
+                // Create columns
+                TableColumn<Prescription, String> patientColumn = new TableColumn<>("Patient");
+                patientColumn.setCellValueFactory(cell -> new SimpleStringProperty(
+                        cell.getValue().getPatientName() != null ? cell.getValue().getPatientName()
+                                : "Patient ID: " + cell.getValue().getPatientId()));
+                patientColumn.setPrefWidth(200);
+
+                TableColumn<Prescription, LocalDate> dateColumn = new TableColumn<>("Date");
+                dateColumn.setCellValueFactory(new PropertyValueFactory<>("prescriptionDate"));
+                dateColumn.setPrefWidth(120);
+
+                TableColumn<Prescription, String> diagnosisColumn = new TableColumn<>("Diagnosis");
+                diagnosisColumn.setCellValueFactory(cell -> {
+                    String diagnosis = cell.getValue().getDiagnosis();
+                    return new SimpleStringProperty(
+                            diagnosis != null && !diagnosis.isEmpty() ? diagnosis : "Not specified");
+                });
+                diagnosisColumn.setPrefWidth(250);
+
+                tableView.getColumns().addAll(patientColumn, dateColumn, diagnosisColumn);
+                tableView.setItems(FXCollections.observableArrayList(prescriptions));
+
+                // Action buttons
+                HBox buttonBox = new HBox(10);
+                Button updateBtn = new Button("Update Prescription");
+                Button deleteBtn = new Button("Delete Prescription");
+                Button viewDetailsBtn = new Button("View Details");
+                Button closeBtn = new Button("Close");
+
+                updateBtn.setDisable(true);
+                deleteBtn.setDisable(true);
+                viewDetailsBtn.setDisable(true);
+
+                tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+                    boolean hasSelection = newSelection != null;
+                    updateBtn.setDisable(!hasSelection);
+                    deleteBtn.setDisable(!hasSelection);
+                    viewDetailsBtn.setDisable(!hasSelection);
+                });
+
+                // Store doctor reference for use in button handlers
+                final Doctor finalDoctor = doctor;
+                final TableView<Prescription> finalTableView = tableView;
+
+                updateBtn.setOnAction(e -> {
+                    Prescription selected = finalTableView.getSelectionModel().getSelectedItem();
+                    if (selected != null && selected.getDoctorId() == finalDoctor.getId()) {
+                        try {
+                            updateDoctorPrescription(selected, finalDoctor.getId(), finalTableView, finalDoctor);
+                        } catch (Exception ex) {
+                            showAlert("Error", "Failed to update prescription: " + ex.getMessage(),
+                                    Alert.AlertType.ERROR);
+                        }
+                    } else {
+                        showAlert("Error", "You can only update your own prescriptions.", Alert.AlertType.WARNING);
+                    }
+                });
+
+                deleteBtn.setOnAction(e -> {
+                    Prescription selected = finalTableView.getSelectionModel().getSelectedItem();
+                    if (selected != null && selected.getDoctorId() == finalDoctor.getId()) {
+                        try {
+                            deleteDoctorPrescription(selected, finalDoctor.getId(), finalTableView, finalDoctor);
+                        } catch (Exception ex) {
+                            showAlert("Error", "Failed to delete prescription: " + ex.getMessage(),
+                                    Alert.AlertType.ERROR);
+                        }
+                    } else {
+                        showAlert("Error", "You can only delete your own prescriptions.", Alert.AlertType.WARNING);
+                    }
+                });
+
+                viewDetailsBtn.setOnAction(e -> {
+                    Prescription selected = tableView.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        viewPrescriptionDetails(selected.getId());
+                    }
+                });
+
+                closeBtn.setOnAction(e -> stage.close());
+
+                buttonBox.getChildren().addAll(updateBtn, deleteBtn, viewDetailsBtn, closeBtn);
+                mainBox.getChildren().addAll(tableView, buttonBox);
+
+                Scene scene = new Scene(mainBox, 800, 500);
+                stage.setScene(scene);
+                stage.show();
+
+            }
+        } catch (SQLException e) {
+            showAlert("Database Error", "Failed to load prescriptions: " + e.getMessage(), Alert.AlertType.ERROR);
+        } catch (Exception e) {
+            showAlert("Error", "Action failed: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    private void updateDoctorPrescription(Prescription prescription, int doctorId, TableView<Prescription> tableView,
+            Doctor doctor) {
+        if (prescription.getDoctorId() != doctorId) {
+            showAlert("Error", "You can only update your own prescriptions.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            List<PrescriptionItem> items = prescriptionService.getPrescriptionItems(prescription.getId());
+
+            Dialog<Map<String, Object>> updateDialog = new Dialog<>();
+            updateDialog.setTitle("Update Prescription");
+            updateDialog.setHeaderText("Update details for Prescription #" + prescription.getId());
+
+            ButtonType updateButtonType = new ButtonType("Update", ButtonBar.ButtonData.OK_DONE);
+            updateDialog.getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            TextField patientIdField = new TextField(String.valueOf(prescription.getPatientId()));
+            DatePicker datePicker = new DatePicker(prescription.getPrescriptionDate());
+            TextArea diagnosisArea = new TextArea(
+                    prescription.getDiagnosis() != null ? prescription.getDiagnosis() : "");
+            diagnosisArea.setPrefRowCount(2);
+            TextArea notesArea = new TextArea(prescription.getNotes() != null ? prescription.getNotes() : "");
+            notesArea.setPrefRowCount(2);
+
+            // For simplicity, update the first medication item
+            TextField medicationField = new TextField(items.isEmpty() ? "" : items.get(0).getMedication());
+            TextField dosageField = new TextField(items.isEmpty() ? "" : items.get(0).getDosage());
+
+            grid.add(new Label("Patient ID*:"), 0, 0);
+            grid.add(patientIdField, 1, 0);
+            grid.add(new Label("Date*:"), 0, 1);
+            grid.add(datePicker, 1, 1);
+            grid.add(new Label("Diagnosis*:"), 0, 2);
+            grid.add(diagnosisArea, 1, 2);
+            grid.add(new Label("Notes:"), 0, 3);
+            grid.add(notesArea, 1, 3);
+            grid.add(new Label("Medication*:"), 0, 4);
+            grid.add(medicationField, 1, 4);
+            grid.add(new Label("Dosage*:"), 0, 5);
+            grid.add(dosageField, 1, 5);
+
+            updateDialog.getDialogPane().setContent(grid);
+
+            updateDialog.setResultConverter(dialogButton -> {
+                if (dialogButton == updateButtonType) {
+                    try {
+                        prescription.setPatientId(Integer.parseInt(patientIdField.getText()));
+                        prescription.setPrescriptionDate(datePicker.getValue());
+                        prescription.setDiagnosis(diagnosisArea.getText());
+                        prescription.setNotes(notesArea.getText());
+                        // Doctor ID remains the same
+
+                        List<PrescriptionItem> newItems = new ArrayList<>();
+                        PrescriptionItem item = new PrescriptionItem();
+                        item.setMedication(medicationField.getText());
+                        item.setDosage(dosageField.getText());
+                        newItems.add(item);
+
+                        Map<String, Object> res = new HashMap<>();
+                        res.put("prescription", prescription);
+                        res.put("items", newItems);
+                        return res;
+                    } catch (Exception ex) {
+                        showAlert("Input Error", "Invalid data: " + ex.getMessage(), Alert.AlertType.ERROR);
+                    }
+                }
+                return null;
+            });
+
+            Optional<Map<String, Object>> result = updateDialog.showAndWait();
+            result.ifPresent(data -> {
+                try {
+                    prescriptionService.updatePrescription((Prescription) data.get("prescription"),
+                            (List<PrescriptionItem>) data.get("items"));
+                    refreshDashboard();
+
+                    // Refresh the table
+                    List<Prescription> updatedPrescriptions = prescriptionService
+                            .getPrescriptionsByDoctor(doctor.getId());
+                    tableView.setItems(FXCollections.observableArrayList(updatedPrescriptions));
+
+                    showAlert("Success", "Prescription updated successfully!", Alert.AlertType.INFORMATION);
+                } catch (SQLException ex) {
+                    showAlert("Database Error", "Failed to update: " + ex.getMessage(), Alert.AlertType.ERROR);
+                }
+            });
+        } catch (SQLException e) {
+            showAlert("Database Error", "Failed to load prescription items: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    private void deleteDoctorPrescription(Prescription prescription, int doctorId, TableView<Prescription> tableView,
+            Doctor doctor) {
+        if (prescription.getDoctorId() != doctorId) {
+            showAlert("Error", "You can only delete your own prescriptions.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            List<PrescriptionItem> items = prescriptionService.getPrescriptionItems(prescription.getId());
+
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Confirm Deletion");
+            confirmAlert.setHeaderText("Delete Prescription ID: " + prescription.getId());
+
+            StringBuilder content = new StringBuilder();
+            content.append("Are you sure you want to delete this prescription?\n\n");
+            content.append("Date: ").append(prescription.getPrescriptionDate()).append("\n");
+            if (prescription.getDiagnosis() != null && !prescription.getDiagnosis().isEmpty()) {
+                content.append("Diagnosis: ").append(prescription.getDiagnosis()).append("\n");
+            }
+            content.append("Medications:\n");
+            for (PrescriptionItem item : items) {
+                content.append("  - ").append(item.getMedication()).append(" (").append(item.getDosage())
+                        .append(")\n");
+            }
+
+            confirmAlert.setContentText(content.toString());
+
+            Optional<ButtonType> result = confirmAlert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                prescriptionService.deletePrescription(prescription.getId());
+                refreshDashboard();
+
+                // Refresh the table
+                List<Prescription> updatedPrescriptions = prescriptionService.getPrescriptionsByDoctor(doctor.getId());
+                tableView.setItems(FXCollections.observableArrayList(updatedPrescriptions));
+
+                showAlert("Success", "Prescription deleted successfully!", Alert.AlertType.INFORMATION);
+            }
+        } catch (SQLException e) {
+            showAlert("Database Error", "Failed to delete prescription: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    private void cancelAppointment() {
+        try {
+            // Ask for doctor email
+            TextInputDialog emailDialog = new TextInputDialog();
+            emailDialog.setTitle("Cancel Appointment");
+            emailDialog.setHeaderText("Enter Doctor email to cancel appointments:");
+            emailDialog.setContentText("Doctor Email:");
+
+            Optional<String> emailResult = emailDialog.showAndWait();
+            if (emailResult.isPresent() && !emailResult.get().isEmpty()) {
+                String doctorEmail = emailResult.get().trim();
+                Doctor doctor = doctorService.getDoctor(doctorEmail);
+
+                if (doctor == null) {
+                    showAlert("Not Found", "Doctor with email " + doctorEmail + " not found.", Alert.AlertType.ERROR);
+                    return;
+                }
+
+                // Get doctor's appointments
+                List<Appointment> appointments = appointmentService.getAppointmentsByDoctorId(doctor.getId());
+
+                // Filter to only scheduled appointments
+                List<Appointment> scheduledAppointments = appointments.stream()
+                        .filter(a -> "scheduled".equalsIgnoreCase(a.getStatus()))
+                        .collect(java.util.stream.Collectors.toList());
+
+                if (scheduledAppointments.isEmpty()) {
+                    showAlert("No Appointments", "No scheduled appointments found for this doctor.",
+                            Alert.AlertType.INFORMATION);
+                    return;
+                }
+
+                // Show appointments in a table
+                Stage stage = new Stage();
+                stage.setTitle("Cancel Appointments - Dr. " + doctor.getFirstName() + " " + doctor.getLastName());
+
+                VBox mainBox = new VBox(10);
+                mainBox.setPadding(new Insets(10));
+
+                TableView<Appointment> tableView = new TableView<>();
+
+                TableColumn<Appointment, String> patientColumn = new TableColumn<>("Patient");
+                patientColumn.setCellValueFactory(new PropertyValueFactory<>("patientName"));
+                patientColumn.setPrefWidth(180);
+
+                TableColumn<Appointment, LocalDate> dateColumn = new TableColumn<>("Date");
+                dateColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentDate"));
+                dateColumn.setPrefWidth(120);
+
+                TableColumn<Appointment, LocalTime> timeColumn = new TableColumn<>("Time");
+                timeColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentTime"));
+                timeColumn.setPrefWidth(100);
+
+                TableColumn<Appointment, String> statusColumn = new TableColumn<>("Status");
+                statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+                statusColumn.setPrefWidth(100);
+
+                tableView.getColumns().addAll(patientColumn, dateColumn, timeColumn, statusColumn);
+                tableView.setItems(FXCollections.observableArrayList(scheduledAppointments));
+
+                HBox buttonBox = new HBox(10);
+                Button cancelBtn = new Button("Cancel Appointment");
+                Button refreshBtn = new Button("Refresh");
+                Button closeBtn = new Button("Close");
+
+                cancelBtn.setDisable(true);
+
+                tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+                    cancelBtn.setDisable(
+                            newSelection == null || !"scheduled".equalsIgnoreCase(newSelection.getStatus()));
+                });
+
+                // Store references for refresh
+                final Doctor finalDoctor = doctor;
+                final TableView<Appointment> finalTableView = tableView;
+                final List<Appointment> finalScheduledAppointments = scheduledAppointments;
+
+                refreshBtn.setOnAction(e -> {
+                    try {
+                        List<Appointment> refreshedAppointments = appointmentService
+                                .getAppointmentsByDoctorId(finalDoctor.getId());
+                        List<Appointment> updatedScheduled = refreshedAppointments.stream()
+                                .filter(a -> "scheduled".equalsIgnoreCase(a.getStatus()))
+                                .collect(java.util.stream.Collectors.toList());
+
+                        finalScheduledAppointments.clear();
+                        finalScheduledAppointments.addAll(updatedScheduled);
+                        finalTableView.setItems(FXCollections.observableArrayList(finalScheduledAppointments));
+
+                        if (updatedScheduled.isEmpty()) {
+                            showAlert("Info", "No scheduled appointments remaining.", Alert.AlertType.INFORMATION);
+                        }
+                    } catch (SQLException ex) {
+                        showAlert("Database Error", "Failed to refresh appointments: " + ex.getMessage(),
+                                Alert.AlertType.ERROR);
+                    }
+                });
+
+                cancelBtn.setOnAction(e -> {
+                    Appointment selected = finalTableView.getSelectionModel().getSelectedItem();
+                    if (selected != null && selected.getDoctorId() == finalDoctor.getId()) {
+                        // Confirm cancellation
+                        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                        confirmAlert.setTitle("Confirm Cancellation");
+                        confirmAlert.setHeaderText("Cancel Appointment ID: " + selected.getId());
+                        confirmAlert.setContentText("Are you sure you want to cancel this appointment?\n\n" +
+                                "Patient: " + selected.getPatientName() + "\n" +
+                                "Date: " + selected.getAppointmentDate() + "\n" +
+                                "Time: " + selected.getAppointmentTime());
+
+                        Optional<ButtonType> result = confirmAlert.showAndWait();
+                        if (result.isPresent() && result.get() == ButtonType.OK) {
+                            try {
+                                selected.setStatus("cancelled");
+                                appointmentService.updateAppointment(selected);
+                                refreshDashboard();
+
+                                // Refresh from database
+                                List<Appointment> refreshedAppointments = appointmentService
+                                        .getAppointmentsByDoctorId(finalDoctor.getId());
+                                List<Appointment> updatedScheduled = refreshedAppointments.stream()
+                                        .filter(a -> "scheduled".equalsIgnoreCase(a.getStatus()))
+                                        .collect(java.util.stream.Collectors.toList());
+
+                                finalScheduledAppointments.clear();
+                                finalScheduledAppointments.addAll(updatedScheduled);
+                                finalTableView.setItems(FXCollections.observableArrayList(finalScheduledAppointments));
+
+                                showAlert("Success", "Appointment cancelled successfully!",
+                                        Alert.AlertType.INFORMATION);
+                            } catch (SQLException ex) {
+                                showAlert("Database Error", "Failed to cancel appointment: " + ex.getMessage(),
+                                        Alert.AlertType.ERROR);
+                            }
+                        }
+                    } else {
+                        showAlert("Error", "You can only cancel your own appointments.", Alert.AlertType.WARNING);
+                    }
+                });
+
+                buttonBox.getChildren().addAll(cancelBtn, refreshBtn, closeBtn);
+
+                closeBtn.setOnAction(e -> stage.close());
+
+                mainBox.getChildren().addAll(tableView, buttonBox);
+
+                Scene scene = new Scene(mainBox, 600, 400);
+                stage.setScene(scene);
+                stage.show();
+            }
+        } catch (SQLException e) {
+            showAlert("Database Error", "Failed to load appointments: " + e.getMessage(), Alert.AlertType.ERROR);
+        } catch (Exception e) {
+            showAlert("Error", "Action failed: " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
     private void loadPrescriptionsIntoTable(TableView<Prescription> tableView, String searchTerm) throws SQLException {
         List<Prescription> prescriptions;
         if (searchTerm == null || searchTerm.isEmpty()) {
@@ -1837,23 +2584,19 @@ public class MainController {
             ObservableList<MedicalInventory> inventoryList = FXCollections.observableArrayList(inventory);
             tableView.setItems(inventoryList);
 
-            TableColumn<MedicalInventory, Integer> idColumn = new TableColumn<>("ID");
-            idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-            idColumn.setPrefWidth(50);
-
             TableColumn<MedicalInventory, String> itemColumn = new TableColumn<>("Item Name");
             itemColumn.setCellValueFactory(new PropertyValueFactory<>("itemName"));
-            itemColumn.setPrefWidth(150);
+            itemColumn.setPrefWidth(200);
 
             TableColumn<MedicalInventory, Integer> quantityColumn = new TableColumn<>("Quantity");
             quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-            quantityColumn.setPrefWidth(80);
+            quantityColumn.setPrefWidth(100);
 
             TableColumn<MedicalInventory, String> unitColumn = new TableColumn<>("Unit");
             unitColumn.setCellValueFactory(new PropertyValueFactory<>("unit"));
-            unitColumn.setPrefWidth(80);
+            unitColumn.setPrefWidth(100);
 
-            tableView.getColumns().addAll(idColumn, itemColumn, quantityColumn, unitColumn);
+            tableView.getColumns().addAll(itemColumn, quantityColumn, unitColumn);
 
             Scene scene = new Scene(tableView, 400, 400);
             stage.setScene(scene);
@@ -2416,6 +3159,12 @@ public class MainController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+
+        // Apply styling
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        dialogPane.getStyleClass().add("custom-alert");
+
         alert.showAndWait();
     }
 
@@ -2466,17 +3215,9 @@ public class MainController {
             TableView<PatientFeedback> tableView = new TableView<>();
             tableView.setItems(FXCollections.observableArrayList(feedbackList));
 
-            TableColumn<PatientFeedback, Integer> idColumn = new TableColumn<>("ID");
-            idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-            idColumn.setPrefWidth(50);
-
-            TableColumn<PatientFeedback, Integer> patientIdColumn = new TableColumn<>("Patient ID");
-            patientIdColumn.setCellValueFactory(new PropertyValueFactory<>("patientId"));
-            patientIdColumn.setPrefWidth(80);
-
             TableColumn<PatientFeedback, Integer> ratingColumn = new TableColumn<>("Rating");
             ratingColumn.setCellValueFactory(new PropertyValueFactory<>("rating"));
-            ratingColumn.setPrefWidth(60);
+            ratingColumn.setPrefWidth(80);
 
             TableColumn<PatientFeedback, String> dateColumn = new TableColumn<>("Date");
             dateColumn.setCellValueFactory(
@@ -2485,9 +3226,9 @@ public class MainController {
 
             TableColumn<PatientFeedback, String> commentsColumn = new TableColumn<>("Comments");
             commentsColumn.setCellValueFactory(new PropertyValueFactory<>("comments"));
-            commentsColumn.setPrefWidth(250);
+            commentsColumn.setPrefWidth(350);
 
-            tableView.getColumns().addAll(idColumn, patientIdColumn, ratingColumn, dateColumn, commentsColumn);
+            tableView.getColumns().addAll(ratingColumn, dateColumn, commentsColumn);
 
             Scene scene = new Scene(tableView, 600, 400);
             stage.setScene(scene);
@@ -2631,4 +3372,143 @@ public class MainController {
             }
         }
     }
+
+    @FXML
+    public void showFeedbackDialog() {
+        Dialog<PatientFeedback> dialog = new Dialog<>();
+        dialog.setTitle("Provide Feedback");
+        dialog.setHeaderText("We value your feedback!");
+
+        ButtonType submitButtonType = new ButtonType("Submit", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(submitButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField emailField = new TextField();
+        emailField.setPromptText("Your Email Address");
+        TextField appointmentIdField = new TextField();
+        appointmentIdField.setPromptText("Appointment ID (Optional)");
+        ComboBox<Integer> ratingBox = new ComboBox<>(FXCollections.observableArrayList(1, 2, 3, 4, 5));
+        ratingBox.setValue(5);
+        TextArea commentsArea = new TextArea();
+        commentsArea.setPromptText("Your comments here...");
+        commentsArea.setPrefRowCount(3);
+
+        grid.add(new Label("Email*:"), 0, 0);
+        grid.add(emailField, 1, 0);
+        grid.add(new Label("Appointment ID:"), 0, 1);
+        grid.add(appointmentIdField, 1, 1);
+        grid.add(new Label("Rating (1-5)*:"), 0, 2);
+        grid.add(ratingBox, 1, 2);
+        grid.add(new Label("Comments:"), 0, 3);
+        grid.add(commentsArea, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == submitButtonType) {
+                String email = emailField.getText().trim();
+                if (email.isEmpty()) {
+                    showAlert("Validation Error", "Please enter your email address", Alert.AlertType.ERROR);
+                    return null;
+                }
+
+                try {
+                    Patient patient = patientService.getPatient(email);
+                    if (patient == null) {
+                        showAlert("Not Found", "No patient found with this email.", Alert.AlertType.ERROR);
+                        return null;
+                    }
+
+                    PatientFeedback feedback = new PatientFeedback();
+                    feedback.setPatientId(patient.getId());
+                    if (ValidationUtils.isValidId(appointmentIdField.getText())) {
+                        feedback.setAppointmentId(Integer.parseInt(appointmentIdField.getText()));
+                    }
+                    feedback.setRating(ratingBox.getValue());
+                    feedback.setComments(commentsArea.getText());
+                    return feedback;
+
+                } catch (SQLException e) {
+                    showAlert("Database Error", "Error validating patient: " + e.getMessage(), Alert.AlertType.ERROR);
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        Optional<PatientFeedback> result = dialog.showAndWait();
+        result.ifPresent(feedback -> {
+            try {
+                hospitalService.addFeedback(feedback);
+                showAlert("Success", "Thank you for your feedback!", Alert.AlertType.INFORMATION);
+            } catch (SQLException e) {
+                showAlert("Error", "Failed to submit feedback: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        });
+    }
+
+    @FXML
+    public void showPatientAppointments() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("View My Appointments");
+        dialog.setHeaderText("Enter your Email Address:");
+        dialog.setContentText("Email:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().isEmpty()) {
+            String email = result.get().trim();
+            try {
+                Patient patient = patientService.getPatient(email);
+                if (patient == null) {
+                    showAlert("Not Found", "No patient found with email: " + email, Alert.AlertType.ERROR);
+                    return;
+                }
+
+                List<Appointment> apps = appointmentService.getAppointmentsByPatientId(patient.getId());
+                if (apps.isEmpty()) {
+                    showAlert("Info", "No appointments found for this patient.", Alert.AlertType.INFORMATION);
+                    return;
+                }
+
+                Stage stage = new Stage();
+                stage.setTitle("My Appointments - " + patient.getFirstName() + " " + patient.getLastName());
+                TableView<Appointment> tv = new TableView<>(FXCollections.observableArrayList(apps));
+
+                TableColumn<Appointment, String> dateCol = new TableColumn<>("Date");
+                dateCol.setCellValueFactory(
+                        cell -> new SimpleStringProperty(cell.getValue().getAppointmentDate().toString()));
+
+                TableColumn<Appointment, String> timeCol = new TableColumn<>("Time");
+                timeCol.setCellValueFactory(
+                        cell -> new SimpleStringProperty(cell.getValue().getAppointmentTime().toString()));
+
+                TableColumn<Appointment, String> doctorCol = new TableColumn<>("Doctor");
+                doctorCol.setCellValueFactory(
+                        cell -> new SimpleStringProperty(cell.getValue().getDoctorName()));
+                doctorCol.setPrefWidth(150);
+
+                TableColumn<Appointment, String> statusCol = new TableColumn<>("Status");
+                statusCol.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getStatus()));
+
+                tv.getColumns().addAll(dateCol, timeCol, doctorCol, statusCol);
+
+                Scene scene = new Scene(tv, 600, 400);
+                stage.setScene(scene);
+                stage.show();
+
+            } catch (SQLException e) {
+                showAlert("Error", "Database error: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    @FXML
+    private void viewDoctorsForDoctor() {
+        viewDoctors();
+    }
+
 }

@@ -8,7 +8,7 @@ import java.util.*;
 
 public class PatientService {
     private PatientDAO patientDAO = new PatientDAO();
-    private Map<Integer, Patient> patientCache = new HashMap<>();
+    private Map<String, Patient> patientCache = new HashMap<>();
     private List<Patient> patientListCache = new ArrayList<>();
 
     public void addPatient(Patient patient) throws SQLException {
@@ -16,13 +16,21 @@ public class PatientService {
         invalidateCache();
     }
 
-    public Patient getPatient(int id) throws SQLException {
-        if (patientCache.containsKey(id)) {
-            return patientCache.get(id);
+    public Patient getPatient(String email) throws SQLException {
+        if (patientCache.containsKey(email)) {
+            return patientCache.get(email);
         }
-        Patient patient = patientDAO.getPatient(id);
+        Patient patient = patientDAO.getPatient(email);
         if (patient != null) {
-            patientCache.put(id, patient);
+            patientCache.put(email, patient);
+        }
+        return patient;
+    }
+
+    public Patient getPatientById(int id) throws SQLException {
+        Patient patient = patientDAO.getPatientById(id);
+        if (patient != null) {
+            patientCache.put(patient.getEmail(), patient);
         }
         return patient;
     }
@@ -33,13 +41,13 @@ public class PatientService {
         }
         patientListCache = patientDAO.getAllPatients();
         for (Patient p : patientListCache) {
-            patientCache.put(p.getId(), p);
+            patientCache.put(p.getEmail(), p);
         }
         return new ArrayList<>(patientListCache);
     }
 
-    public void updatePatient(Patient patient) throws SQLException {
-        patientDAO.updatePatient(patient);
+    public void updatePatient(Patient patient, String originalEmail) throws SQLException {
+        patientDAO.updatePatient(patient, originalEmail);
         invalidateCache();
     }
 

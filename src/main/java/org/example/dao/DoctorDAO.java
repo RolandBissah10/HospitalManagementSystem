@@ -39,7 +39,35 @@ public class DoctorDAO {
         }
     }
 
-    public Doctor getDoctor(int id) throws SQLException {
+    public Doctor getDoctor(String email) throws SQLException {
+        String sql = "SELECT * FROM doctors WHERE email = ?";
+        long startTime = System.currentTimeMillis();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Doctor(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("specialty"),
+                        rs.getInt("department_id"),
+                        rs.getString("phone"),
+                        rs.getString("email")
+                );
+            }
+
+        } finally {
+            updatePerformanceStats(startTime);
+        }
+        return null;
+    }
+
+    public Doctor getDoctorById(int id) throws SQLException {
         String sql = "SELECT * FROM doctors WHERE id = ?";
         long startTime = System.currentTimeMillis();
 
@@ -94,8 +122,8 @@ public class DoctorDAO {
         return doctors;
     }
 
-    public void updateDoctor(Doctor doctor) throws SQLException {
-        String sql = "UPDATE doctors SET first_name = ?, last_name = ?, specialty = ?, department_id = ?, phone = ?, email = ? WHERE id = ?";
+    public void updateDoctor(Doctor doctor, String originalEmail) throws SQLException {
+        String sql = "UPDATE doctors SET first_name = ?, last_name = ?, specialty = ?, department_id = ?, phone = ?, email = ? WHERE email = ?";
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -107,7 +135,7 @@ public class DoctorDAO {
             stmt.setInt(4, doctor.getDepartmentId());
             stmt.setString(5, doctor.getPhone());
             stmt.setString(6, doctor.getEmail());
-            stmt.setInt(7, doctor.getId());
+            stmt.setString(7, originalEmail);
             stmt.executeUpdate();
 
         } finally {

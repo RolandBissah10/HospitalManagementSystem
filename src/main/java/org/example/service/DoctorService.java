@@ -2,27 +2,34 @@ package org.example.service;
 
 import org.example.dao.DoctorDAO;
 import org.example.model.Doctor;
-import org.example.model.Patient;
 
 import java.sql.SQLException;
 import java.util.*;
 
 public class DoctorService {
     private DoctorDAO doctorDAO = new DoctorDAO();
-    private Map<Integer, Doctor> doctorCache = new HashMap<>();
+    private Map<String, Doctor> doctorCache = new HashMap<>();
 
     public void addDoctor(Doctor doctor) throws SQLException {
         doctorDAO.addDoctor(doctor);
         invalidateCache();
     }
 
-    public Doctor getDoctor(int id) throws SQLException {
-        if (doctorCache.containsKey(id)) {
-            return doctorCache.get(id);
+    public Doctor getDoctor(String email) throws SQLException {
+        if (doctorCache.containsKey(email)) {
+            return doctorCache.get(email);
         }
-        Doctor doctor = doctorDAO.getDoctor(id);
+        Doctor doctor = doctorDAO.getDoctor(email);
         if (doctor != null) {
-            doctorCache.put(id, doctor);
+            doctorCache.put(email, doctor);
+        }
+        return doctor;
+    }
+
+    public Doctor getDoctorById(int id) throws SQLException {
+        Doctor doctor = doctorDAO.getDoctorById(id);
+        if (doctor != null) {
+            doctorCache.put(doctor.getEmail(), doctor);
         }
         return doctor;
     }
@@ -31,13 +38,13 @@ public class DoctorService {
         List<Doctor> doctors = doctorDAO.getAllDoctors();
         // Populate cache
         for (Doctor d : doctors) {
-            doctorCache.put(d.getId(), d);
+            doctorCache.put(d.getEmail(), d);
         }
         return doctors;
     }
 
-    public void updateDoctor(Doctor doctor) throws SQLException {
-        doctorDAO.updateDoctor(doctor);
+    public void updateDoctor(Doctor doctor, String originalEmail) throws SQLException {
+        doctorDAO.updateDoctor(doctor, originalEmail);
         invalidateCache();
     }
 

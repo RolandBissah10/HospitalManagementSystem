@@ -40,6 +40,10 @@ public class PrescriptionService {
         return prescriptionDAO.getPrescriptionsByPatient(patientId);
     }
 
+    public List<Prescription> getPrescriptionsByDoctor(int doctorId) throws SQLException {
+        return prescriptionDAO.getPrescriptionsByDoctor(doctorId);
+    }
+
     public List<PrescriptionItem> getPrescriptionItems(int prescriptionId) throws SQLException {
         if (prescriptionItemsCache.containsKey(prescriptionId)) {
             return new ArrayList<>(prescriptionItemsCache.get(prescriptionId));

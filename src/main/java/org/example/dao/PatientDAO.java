@@ -3,7 +3,6 @@ package org.example.dao;
 import org.example.model.Patient;
 import org.example.util.DatabaseConnection;
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +39,34 @@ public class PatientDAO {
         }
     }
 
-    public Patient getPatient(int id) throws SQLException {
+    public Patient getPatient(String email) throws SQLException {
+        String sql = "SELECT * FROM patients WHERE email = ?";
+        long startTime = System.currentTimeMillis();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return new Patient(
+                        rs.getInt("id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getDate("date_of_birth").toLocalDate(),
+                        rs.getString("address"),
+                        rs.getString("phone"),
+                        rs.getString("email"));
+            }
+
+        } finally {
+            updatePerformanceStats(startTime);
+        }
+        return null;
+    }
+
+    public Patient getPatientById(int id) throws SQLException {
         String sql = "SELECT * FROM patients WHERE id = ?";
         long startTime = System.currentTimeMillis();
 
@@ -93,8 +119,8 @@ public class PatientDAO {
         return patients;
     }
 
-    public void updatePatient(Patient patient) throws SQLException {
-        String sql = "UPDATE patients SET first_name = ?, last_name = ?, date_of_birth = ?, address = ?, phone = ?, email = ? WHERE id = ?";
+    public void updatePatient(Patient patient, String originalEmail) throws SQLException {
+        String sql = "UPDATE patients SET first_name = ?, last_name = ?, date_of_birth = ?, address = ?, phone = ?, email = ? WHERE email = ?";
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -106,7 +132,7 @@ public class PatientDAO {
             stmt.setString(4, patient.getAddress());
             stmt.setString(5, patient.getPhone());
             stmt.setString(6, patient.getEmail());
-            stmt.setInt(7, patient.getId());
+            stmt.setString(7, originalEmail);
             stmt.executeUpdate();
 
         } finally {

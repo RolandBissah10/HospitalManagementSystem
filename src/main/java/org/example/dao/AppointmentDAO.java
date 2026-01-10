@@ -17,7 +17,7 @@ public class AppointmentDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, appointment.getPatientId());
             stmt.setInt(2, appointment.getDoctorId());
@@ -41,24 +41,44 @@ public class AppointmentDAO {
     }
 
     public Appointment getAppointment(int id) throws SQLException {
-        String sql = "SELECT * FROM appointments WHERE id = ?";
+        String sql = "SELECT a.*, p.first_name as p_first, p.last_name as p_last, d.first_name as d_first, d.last_name as d_last "
+                +
+                "FROM appointments a " +
+                "LEFT JOIN patients p ON a.patient_id = p.id " +
+                "LEFT JOIN doctors d ON a.doctor_id = d.id " +
+                "WHERE a.id = ?";
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new Appointment(
+                Appointment appt = new Appointment(
                         rs.getInt("id"),
                         rs.getInt("patient_id"),
                         rs.getInt("doctor_id"),
                         rs.getDate("appointment_date").toLocalDate(),
                         rs.getTime("appointment_time").toLocalTime(),
-                        rs.getString("status")
-                );
+                        rs.getString("status"));
+                String pFirst = rs.getString("p_first");
+                String pLast = rs.getString("p_last");
+                if (pFirst != null && pLast != null) {
+                    appt.setPatientName(pFirst + " " + pLast);
+                } else {
+                    appt.setPatientName("Unknown");
+                }
+
+                String dFirst = rs.getString("d_first");
+                String dLast = rs.getString("d_last");
+                if (dFirst != null && dLast != null) {
+                    appt.setDoctorName("Dr. " + dFirst + " " + dLast);
+                } else {
+                    appt.setDoctorName("Unknown");
+                }
+                return appt;
             }
 
         } finally {
@@ -69,22 +89,41 @@ public class AppointmentDAO {
 
     public List<Appointment> getAllAppointments() throws SQLException {
         List<Appointment> appointments = new ArrayList<>();
-        String sql = "SELECT * FROM appointments";
+        String sql = "SELECT a.*, p.first_name as p_first, p.last_name as p_last, d.first_name as d_first, d.last_name as d_last "
+                +
+                "FROM appointments a " +
+                "LEFT JOIN patients p ON a.patient_id = p.id " +
+                "LEFT JOIN doctors d ON a.doctor_id = d.id";
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                appointments.add(new Appointment(
+                Appointment appt = new Appointment(
                         rs.getInt("id"),
                         rs.getInt("patient_id"),
                         rs.getInt("doctor_id"),
                         rs.getDate("appointment_date").toLocalDate(),
                         rs.getTime("appointment_time").toLocalTime(),
-                        rs.getString("status")
-                ));
+                        rs.getString("status"));
+                String pFirst = rs.getString("p_first");
+                String pLast = rs.getString("p_last");
+                if (pFirst != null && pLast != null) {
+                    appt.setPatientName(pFirst + " " + pLast);
+                } else {
+                    appt.setPatientName("Unknown");
+                }
+
+                String dFirst = rs.getString("d_first");
+                String dLast = rs.getString("d_last");
+                if (dFirst != null && dLast != null) {
+                    appt.setDoctorName("Dr. " + dFirst + " " + dLast);
+                } else {
+                    appt.setDoctorName("Unknown");
+                }
+                appointments.add(appt);
             }
 
         } finally {
@@ -98,7 +137,7 @@ public class AppointmentDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, appointment.getPatientId());
             stmt.setInt(2, appointment.getDoctorId());
@@ -118,7 +157,7 @@ public class AppointmentDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
             stmt.executeUpdate();
@@ -130,25 +169,45 @@ public class AppointmentDAO {
 
     public List<Appointment> getAppointmentsByDateRange(LocalDate startDate, LocalDate endDate) throws SQLException {
         List<Appointment> appointments = new ArrayList<>();
-        String sql = "SELECT * FROM appointments WHERE appointment_date BETWEEN ? AND ? ORDER BY appointment_date, appointment_time";
+        String sql = "SELECT a.*, p.first_name as p_first, p.last_name as p_last, d.first_name as d_first, d.last_name as d_last "
+                +
+                "FROM appointments a " +
+                "LEFT JOIN patients p ON a.patient_id = p.id " +
+                "LEFT JOIN doctors d ON a.doctor_id = d.id " +
+                "WHERE a.appointment_date BETWEEN ? AND ? ORDER BY a.appointment_date, a.appointment_time";
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setDate(1, Date.valueOf(startDate));
             stmt.setDate(2, Date.valueOf(endDate));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    appointments.add(new Appointment(
+                    Appointment appt = new Appointment(
                             rs.getInt("id"),
                             rs.getInt("patient_id"),
                             rs.getInt("doctor_id"),
                             rs.getDate("appointment_date").toLocalDate(),
                             rs.getTime("appointment_time").toLocalTime(),
-                            rs.getString("status")
-                    ));
+                            rs.getString("status"));
+                    String pFirst = rs.getString("p_first");
+                    String pLast = rs.getString("p_last");
+                    if (pFirst != null && pLast != null) {
+                        appt.setPatientName(pFirst + " " + pLast);
+                    } else {
+                        appt.setPatientName("Unknown");
+                    }
+
+                    String dFirst = rs.getString("d_first");
+                    String dLast = rs.getString("d_last");
+                    if (dFirst != null && dLast != null) {
+                        appt.setDoctorName("Dr. " + dFirst + " " + dLast);
+                    } else {
+                        appt.setDoctorName("Unknown");
+                    }
+                    appointments.add(appt);
                 }
             }
 
@@ -163,7 +222,7 @@ public class AppointmentDAO {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, status);
 
