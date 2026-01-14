@@ -1,14 +1,26 @@
 # Hospital Management System
 
-A robust, optimized JavaFX application for managing hospital operations with a focus on database performance and data structure application.
+A robust, optimized JavaFX application for managing hospital operations with a focus on database performance, data structure application, and microservices architecture.
 
 ### 📂 Directory Structure
 
 ```
 src/main/java/org/example
-├── controller
-│   └── MainController.java
-├── dao
+├── controller                  # Domain-specific & View Controllers
+│   ├── AdministratorController.java
+│   ├── AppointmentController.java
+│   ├── DepartmentController.java
+│   ├── DoctorController.java
+│   ├── DoctorPortalController.java
+│   ├── FeedbackController.java
+│   ├── InventoryController.java
+│   ├── MainController.java     # Application entry/initializer
+│   ├── PatientController.java
+│   ├── PatientPortalController.java
+│   ├── PrescriptionController.java
+│   ├── ReceptionistController.java
+│   └── ReportController.java
+├── dao                         # Data Access Objects
 │   ├── AppointmentDAO.java
 │   ├── DepartmentDAO.java
 │   ├── DoctorDAO.java
@@ -16,7 +28,7 @@ src/main/java/org/example
 │   ├── PatientDAO.java
 │   ├── PatientFeedbackDAO.java
 │   └── PrescriptionDAO.java
-├── model
+├── model                       # Data Models
 │   ├── Appointment.java
 │   ├── Department.java
 │   ├── Doctor.java
@@ -25,26 +37,37 @@ src/main/java/org/example
 │   ├── PatientFeedback.java
 │   ├── Prescription.java
 │   └── PrescriptionItem.java
-├── service
+├── service                     # Business Logic Services
 │   ├── AppointmentService.java
 │   ├── DoctorService.java
 │   ├── HospitalService.java
 │   ├── PatientService.java
 │   └── PrescriptionService.java
-└── util
+└── util                        # Utilities
+    ├── AlertUtils.java
     ├── DatabaseConnection.java
     ├── DatabaseUpdater.java
     └── ValidationUtils.java
+
+src/main/resources              # FXML Views & Styles
+├── AdministratorView.fxml
+├── DoctorView.fxml
+├── MainView.fxml
+├── PatientView.fxml
+├── ReceptionistView.fxml
+└── styles.css
 ```
 
 ## 🚀 Features
 
+- **Microservices Architecture**: Monolithic controller refactored into domain-specific controllers (e.g., `DoctorController`, `PatientController`) for better maintainability.
+- **Role-Based Portals**: Dedicated dashboards for Administrators, Doctors, Receptionists, and Patients.
 - **Dynamic Patient & Doctor Management**: Full CRUD operations with JavaFX UI.
 - **Smart Appointment Scheduling**: Integrated validation and status tracking.
 - **Optimized Searching**: Case-insensitive search with B-Tree database indexing.
 - **Advanced Sorting (DSA)**: Custom implementation of **QuickSort** and **MergeSort** for patient listings.
 - **Performance Dashboard**: Real-time metrics comparing database vs. cache latency.
-- **Patient Feedback System**: integrated feedback loop for quality assurance.
+- **Patient Feedback System**: Integrated feedback loop for quality assurance.
 - **Unstructured Data Strategy**: Detailed NoSQL design for patient notes and logs.
 
 ## 🛠 Prerequisites
@@ -82,11 +105,12 @@ Detailed reports are available in:
 
 ## 🏗 Architecture
 
-The project follows a clean **Controller-Service-DAO** pattern:
+The project follows a clean **Controller-Service-DAO** pattern refactored into a modular design:
 - **DAO (Data Access Layer)**: Parameterized JDBC queries for secure and structured DB access.
 - **Service (Business Layer)**: Handles caching, validation, and algorithmic logic.
-- **Controller (UI Layer)**: Manages JavaFX interaction and view synchronization.
-
+- **Controller (UI Layer)**:
+    - **View Controllers**: Handle FXML layouts and event delegation (e.g., `AdministratorController`).
+    - **Logic Controllers**: Handle specific business logic (e.g., `PatientController`), keeping classes small and focused.
 
 
 ---
