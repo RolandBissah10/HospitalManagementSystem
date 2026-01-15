@@ -1,8 +1,8 @@
 # Hospital Management System
 
-A robust, optimized JavaFX application for managing hospital operations with a focus on database performance, data structure application, and microservices architecture.
+A robust, optimized JavaFX application for managing hospital operations with a **hybrid database architecture** (MySQL + MongoDB), microservices design, and advanced data structure implementation.
 
-### 📂 Directory Structure
+## 📂 Directory Structure
 
 ```
 src/main/java/org/example
@@ -15,6 +15,7 @@ src/main/java/org/example
 │   ├── FeedbackController.java
 │   ├── InventoryController.java
 │   ├── MainController.java     # Application entry/initializer
+│   ├── MedicalLogController.java    # NoSQL medical logs
 │   ├── PatientController.java
 │   ├── PatientPortalController.java
 │   ├── PrescriptionController.java
@@ -25,6 +26,7 @@ src/main/java/org/example
 │   ├── DepartmentDAO.java
 │   ├── DoctorDAO.java
 │   ├── MedicalInventoryDAO.java
+│   ├── MedicalLogDAO.java      # MongoDB DAO
 │   ├── PatientDAO.java
 │   ├── PatientFeedbackDAO.java
 │   └── PrescriptionDAO.java
@@ -33,6 +35,7 @@ src/main/java/org/example
 │   ├── Department.java
 │   ├── Doctor.java
 │   ├── MedicalInventory.java
+│   ├── MedicalLog.java         # NoSQL model
 │   ├── Patient.java
 │   ├── PatientFeedback.java
 │   ├── Prescription.java
@@ -45,8 +48,9 @@ src/main/java/org/example
 │   └── PrescriptionService.java
 └── util                        # Utilities
     ├── AlertUtils.java
-    ├── DatabaseConnection.java
+    ├── DatabaseConnection.java     # MySQL connection
     ├── DatabaseUpdater.java
+    ├── MongoDBConnection.java      # MongoDB Atlas connection
     └── ValidationUtils.java
 
 src/main/resources              # FXML Views & Styles
@@ -60,58 +64,138 @@ src/main/resources              # FXML Views & Styles
 
 ## 🚀 Features
 
-- **Microservices Architecture**: Monolithic controller refactored into domain-specific controllers (e.g., `DoctorController`, `PatientController`) for better maintainability.
-- **Role-Based Portals**: Dedicated dashboards for Administrators, Doctors, Receptionists, and Patients.
-- **Dynamic Patient & Doctor Management**: Full CRUD operations with JavaFX UI.
-- **Smart Appointment Scheduling**: Integrated validation and status tracking.
-- **Optimized Searching**: Case-insensitive search with B-Tree database indexing.
-- **Advanced Sorting (DSA)**: Custom implementation of **QuickSort** and **MergeSort** for patient listings.
-- **Performance Dashboard**: Real-time metrics comparing database vs. cache latency.
-- **Patient Feedback System**: Integrated feedback loop for quality assurance.
-- **Unstructured Data Strategy**: Detailed NoSQL design for patient notes and logs.
+### Core Functionality
+- **Microservices Architecture**: Monolithic controller refactored into domain-specific controllers for better maintainability
+- **Role-Based Portals**: Dedicated dashboards for Administrators, Doctors, Receptionists, and Patients
+- **Dynamic Patient & Doctor Management**: Full CRUD operations with JavaFX UI
+- **Smart Appointment Scheduling**: Integrated validation and status tracking
+- **Inventory Management**: Track medical supplies with low-stock alerts
+- **Prescription Management**: Digital prescription creation and tracking
+
+### Database & Performance
+- **Hybrid Database Architecture**: 
+  - **MySQL** for structured relational data (patients, doctors, appointments)
+  - **MongoDB Atlas** for unstructured medical logs and notes
+- **Optimized Searching**: Case-insensitive search with B-Tree database indexing
+- **Advanced Sorting (DSA)**: Custom **QuickSort** implementation for patient listings
+- **Performance Dashboard**: Real-time metrics comparing database vs. cache latency
+- **Caching**: `ConcurrentHashMap` reducing lookup time from ~100ms to <1ms
+- **Normalization**: Database schema in **3NF** to eliminate redundancy
+
+### Additional Features
+- **Patient Feedback System**: Integrated feedback loop for quality assurance
+- **Department Management**: Organize doctors by departments
+- **Medical Logs (NoSQL)**: Store unstructured patient notes in MongoDB
 
 ## 🛠 Prerequisites
 
-- Java 23
-- MySQL 8.0 or PostgreSQL
-- Maven 3.6+
+- **Java 23**
+- **MySQL 8.0** or PostgreSQL
+- **MongoDB Atlas** account (free tier works)
+- **Maven 3.6+**
 
 ## 📥 Setup Instructions
 
-1. **Database Setup**:
-   - Create a database `hospital_db`.
-   - Run [schema.sql](schema.sql) to initialize tables and sample data.
-   ```bash
-   mysql -u root -p hospital_db < schema.sql
-   ```
-2. **Configuration**:
-   - Update credentials in `src/main/java/org/example/util/DatabaseConnection.java`.
-3. **Build & Run**:
-   ```bash
-   mvn clean javafx:run
-   ```
+### 1. MySQL Database Setup
+Create a database and initialize tables:
+```bash
+mysql -u root -p hospital_db < schema.sql
+```
 
-## 📈 Performance & DSA
+Update MySQL credentials in:
+```
+src/main/java/org/example/util/DatabaseConnection.java
+```
+
+### 2. MongoDB Atlas Setup
+1. Create a free MongoDB Atlas cluster at [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
+2. Get your connection string
+3. Update MongoDB credentials in:
+```
+src/main/java/org/example/util/MongoDBConnection.java
+```
+
+Replace the `CONNECTION_STRING` with your Atlas URI:
+```java
+private static final String CONNECTION_STRING = "mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/...";
+```
+
+### 3. Build & Run
+```bash
+mvn clean javafx:run
+```
+
+## 📈 Performance & Data Structures
 
 The system leverages several optimization techniques:
-- **Indexing**: High-frequency columns indexed to reduce search time by ~80%.
-- **Caching**: `ConcurrentHashMap` caching layer reducing lookup time from ~100ms to <1ms.
-- **Normalization**: Database schema in **3NF** to eliminate redundancy.
-- **QuickSort**: Custom sorting algorithm implemented in the `HospitalService` for demo and efficiency.
 
-Detailed reports are available in:
-- [Performance_Report.md](Performance_Report.md)
-- [NoSQL_Design.md](NoSQL_Design.md)
+| Technique | Implementation | Performance Gain |
+|-----------|---------------|------------------|
+| **Indexing** | B-Tree indexes on high-frequency columns | ~80% search time reduction |
+| **Caching** | `ConcurrentHashMap` in-memory cache | 100ms → <1ms lookup time |
+| **Sorting** | Custom QuickSort algorithm | O(n log n) average case |
+| **Normalization** | 3NF database schema | Eliminates data redundancy |
+| **NoSQL** | MongoDB for unstructured data | Flexible schema for medical logs |
+
+### Detailed Documentation
+- [Performance_Report.md](Performance_Report.md) - Benchmark results and analysis
+- [NoSQL_Design.md](NoSQL_Design.md) - MongoDB schema design rationale
 
 ## 🏗 Architecture
 
-The project follows a clean **Controller-Service-DAO** pattern refactored into a modular design:
-- **DAO (Data Access Layer)**: Parameterized JDBC queries for secure and structured DB access.
-- **Service (Business Layer)**: Handles caching, validation, and algorithmic logic.
-- **Controller (UI Layer)**:
-    - **View Controllers**: Handle FXML layouts and event delegation (e.g., `AdministratorController`).
-    - **Logic Controllers**: Handle specific business logic (e.g., `PatientController`), keeping classes small and focused.
+The project follows a clean **Controller-Service-DAO** pattern with microservices design:
 
+### Layers
+1. **DAO (Data Access Layer)**: 
+   - Parameterized JDBC queries for MySQL
+   - MongoDB driver for NoSQL operations
+   - Secure and structured database access
+
+2. **Service (Business Layer)**: 
+   - Caching logic
+   - Input validation
+   - Sorting algorithms
+   - Business rules enforcement
+
+3. **Controller (UI Layer)**:
+   - **View Controllers**: Handle FXML layouts and event delegation (e.g., `AdministratorController`)
+   - **Logic Controllers**: Handle specific business logic (e.g., `PatientController`), keeping classes small and focused (<250 lines)
+
+### Design Principles
+- **Single Responsibility**: Each controller handles one domain
+- **Separation of Concerns**: Clear boundaries between layers
+- **Code Maintainability**: No class exceeds 250 lines (MainController < 50 lines)
+
+## 🎯 Key Technologies
+
+- **Frontend**: JavaFX 23 with FXML
+- **Backend**: Java 23
+- **Relational DB**: MySQL 8.0 (JDBC)
+- **NoSQL DB**: MongoDB Atlas (MongoDB Driver 4.10.1)
+- **Build Tool**: Maven
+- **Architecture**: MVC + Microservices
+
+## 📝 Usage
+
+### For Administrators
+- Full system access
+- Manage patients, doctors, appointments, inventory, prescriptions
+- View system reports and statistics
+
+### For Doctors
+- View appointments and patient records
+- Create and manage prescriptions
+- Add medical logs (stored in MongoDB)
+
+### For Receptionists
+- Register new patients
+- Schedule appointments
+- Search patient records
+
+### For Patients
+- View personal appointments
+- Submit feedback
 
 ---
-*Developed as part of the Database Fundamentals project objectives.*
+
+*Developed as part of the Database Fundamentals project - demonstrating hybrid database architecture, microservices design, and advanced data structure implementation.*
