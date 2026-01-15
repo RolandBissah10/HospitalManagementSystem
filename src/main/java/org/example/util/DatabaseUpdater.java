@@ -29,7 +29,31 @@ public class DatabaseUpdater {
             stmt.execute("UPDATE prescriptions SET diagnosis = '' WHERE diagnosis IS NULL");
             stmt.execute("UPDATE prescriptions SET notes = '' WHERE notes IS NULL");
 
+            // 4. Ensure Indexes exist
+            ensureIndex(conn, "idx_patients_name", "patients", "first_name, last_name");
+            ensureIndex(conn, "idx_doctors_department", "doctors", "department_id");
+            ensureIndex(conn, "idx_appointments_date", "appointments", "appointment_date");
+            ensureIndex(conn, "idx_appointments_patient", "appointments", "patient_id");
+            ensureIndex(conn, "idx_appointments_doctor", "appointments", "doctor_id");
+            ensureIndex(conn, "idx_inventory_name", "medical_inventory", "item_name");
+
             System.out.println("Database schema updated successfully!");
+        }
+    }
+
+    private static void ensureIndex(Connection conn, String indexName, String table, String columns)
+            throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            // Check if index exists (MySQL specific)
+            try (ResultSet rs = stmt
+                    .executeQuery("SHOW INDEX FROM " + table + " WHERE Key_name = '" + indexName + "'")) {
+                if (!rs.next()) {
+                    stmt.execute("CREATE INDEX " + indexName + " ON " + table + " (" + columns + ")");
+                    System.out.println("Created index: " + indexName);
+                }
+            } catch (SQLException e) {
+                // Ignore if table doesn't exist or other minor issues
+            }
         }
     }
 

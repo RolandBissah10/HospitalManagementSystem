@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+
+<HBox xmlns="http://javafx.com/javafx/11.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controller.DoctorPortalController"
+      spacing="0">
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+              styleClass="sidebar-scroll" HBox.hgrow="NEVER"
+              style="-fx-background-color: #111827; -fx-min-width: 200; -fx-pref-width: 200; -fx-padding: 0; -fx-background: #111827;">
+       <VBox style="-fx-background-color: #111827; -fx-padding: 15;">
+          <Label text="DOCTOR PORTAL"
+                 style="-fx-font-size: 10px; -fx-text-fill: #95a5a6; -fx-font-weight: bold; -fx-padding: 0 0 10 0;" />
+          <VBox spacing="6">
+             <Button onAction="#viewAppointments" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="📅" styleClass="icon-root" style="-fx-text-fill: #0ea5e9;" /><Label text="My Schedule" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+             <Button onAction="#cancelAppointment" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="❌" styleClass="icon-root" style="-fx-text-fill: #ef4444;" /><Label text="Cancel Schedule" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+             <Button onAction="#viewPatients" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="👥" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Patients" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+             <Button onAction="#viewDoctorsForDoctor" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="🩺" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="View Doctors" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+             <Button onAction="#addPrescription" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="💊" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="Add Prescription" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+             <Button onAction="#viewDoctorPrescriptions" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="📝" styleClass="icon-root" style="-fx-text-fill: #10b981;" /><Label text="My Prescriptions" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+
+             <Separator style="-fx-background-color: #374151; -fx-padding: 5 0;" />
+             <Label text="NoSQL LOGS" style="-fx-font-size: 9px; -fx-text-fill: #6b7280; -fx-font-weight: bold;" />
+             <Button onAction="#addMedicalLog" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="📓" styleClass="icon-root" style="-fx-text-fill: #f59e0b;" /><Label text="Add Medical Log" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+             <Button onAction="#viewMedicalLogs" styleClass="nav-button"><graphic><HBox spacing="8" alignment="CENTER_LEFT"><Label text="📋" styleClass="icon-root" style="-fx-text-fill: #f59e0b;" /><Label text="View Logs" style="-fx-text-fill: white;" /></HBox></graphic></Button>
+          </VBox>
+       </VBox>
+     </ScrollPane>
+     
+     <!-- Doctor Content -->
+     <VBox fx:id="contentArea" spacing="20" style="-fx-padding: 30; -fx-background-color: white;" HBox.hgrow="ALWAYS" alignment="TOP_CENTER">
+        <Label text="Doctor's Dashboard" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #0f172a;" />
+        <ImageView fitWidth="200" fitHeight="200" preserveRatio="true">
+           <image>
+              <!-- Using a simple placeholder graphic if image not found -->
+              <!-- <Image url="@doctor_bg.png" /> -->
+           </image>
+        </ImageView>
+        <Label text="Manage your appointments and patients efficiently." style="-fx-text-fill: #64748b;" />
+        
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="View Upcoming Appointments" onAction="#viewAppointments" styleClass="btn-primary" style="-fx-font-size: 14px; padding: 10 20;" />
+            <Button text="Search Patient Record" onAction="#searchPatients" styleClass="btn-primary" style="-fx-font-size: 14px; padding: 10 20;" />
+        </HBox>
+     </VBox>
+</HBox>

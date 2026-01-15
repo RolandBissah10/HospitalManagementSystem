@@ -65,10 +65,6 @@ public class PrescriptionService {
         return prescriptions;
     }
 
-    public List<Prescription> searchPrescriptions(String searchTerm) throws SQLException {
-        return prescriptionDAO.searchPrescriptions(searchTerm);
-    }
-
     public void deletePrescription(int id) throws SQLException {
         prescriptionDAO.deletePrescription(id);
         invalidateCache();

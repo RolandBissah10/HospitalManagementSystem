@@ -86,27 +86,6 @@ public class MedicalInventoryDAO {
         }
     }
 
-    public List<MedicalInventory> searchInventory(String searchTerm) throws SQLException {
-        List<MedicalInventory> inventory = new ArrayList<>();
-        String sql = "SELECT * FROM medical_inventory WHERE item_name LIKE ? ORDER BY item_name";
-
-        try (Connection conn = DatabaseConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, "%" + searchTerm + "%");
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                inventory.add(new MedicalInventory(
-                        rs.getInt("id"),
-                        rs.getString("item_name"),
-                        rs.getInt("quantity"),
-                        rs.getString("unit")));
-            }
-        }
-        return inventory;
-    }
-
     public List<MedicalInventory> getLowStockItems(int threshold) throws SQLException {
         List<MedicalInventory> lowStock = new ArrayList<>();
         String sql = "SELECT * FROM medical_inventory WHERE quantity <= ? ORDER BY quantity";
