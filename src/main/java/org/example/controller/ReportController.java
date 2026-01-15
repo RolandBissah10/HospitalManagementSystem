@@ -106,12 +106,6 @@ public class ReportController {
         info.append("• Receptionist: Registration & scheduling\n");
         info.append("• Patient: View appointments & feedback\n\n");
 
-        info.append("🔧 TECHNOLOGY STACK:\n");
-        info.append("• JavaFX 23 (UI Framework)\n");
-        info.append("• MySQL 8.0 (Relational Database)\n");
-        info.append("• MongoDB 4.10 (NoSQL Database)\n");
-        info.append("• Maven (Build Tool)\n\n");
-
         info.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         info.append("For support: support@generalhospital.com\n");
         info.append("Emergency: 911\n");
