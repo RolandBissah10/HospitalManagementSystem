@@ -6,8 +6,8 @@ import com.mongodb.client.MongoDatabase;
 
 public class MongoDBConnection {
     // Connection string with TLS configuration for Java 23 compatibility
-    private static final String CONNECTION_STRING = "mongodb+srv://rolandbissah10_db_user:7uBXvdN4cwXhuc2O@cluster0.8egkscw.mongodb.net/?retryWrites=true&w=majority&tls=true&tlsAllowInvalidHostnames=true";
-    private static final String DATABASE_NAME = "hospital_logs_db";
+    private static final String CONNECTION_STRING = EnvLoader.get("MONGO_URI");
+    private static final String DATABASE_NAME = EnvLoader.get("MONGO_DB");
 
     private static MongoClient mongoClient = null;
 

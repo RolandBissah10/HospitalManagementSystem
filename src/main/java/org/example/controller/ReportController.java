@@ -88,12 +88,6 @@ public class ReportController {
         info.append("• Medical Logs (NoSQL - MongoDB)\n");
         info.append("• Performance Analytics & Reports\n\n");
 
-        info.append("🗄️ DATABASE ARCHITECTURE:\n");
-        info.append("• MySQL: Structured relational data\n");
-        info.append("• MongoDB Atlas: Unstructured medical logs\n");
-        info.append("• 3NF Normalization for data integrity\n");
-        info.append("• Indexed queries for performance\n\n");
-
         info.append("⚡ PERFORMANCE OPTIMIZATIONS:\n");
         info.append("• ConcurrentHashMap caching\n");
         info.append("• Custom QuickSort algorithm\n");
