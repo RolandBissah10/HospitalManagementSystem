@@ -36,7 +36,6 @@ public class DoctorService {
 
     public List<Doctor> getAllDoctors() throws SQLException {
         List<Doctor> doctors = doctorDAO.getAllDoctors();
-        // Populate cache
         for (Doctor d : doctors) {
             doctorCache.put(d.getEmail(), d);
         }
